@@ -1,13 +1,16 @@
 body {
+  height: 100%;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 1.2rem;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+
+#chessboard {
+  display: grid;
+  grid-template-columns: repeat(8,100px);
+  grid-template-rows: repeat(8,100px);
+  width: 800px;
+  height: 800px;
+  background-color: #0b6623;
 }
