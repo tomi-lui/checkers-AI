@@ -17,8 +17,6 @@ function getSVGURI(faIcon: IconLookup, color: string): String {
     abstract.children[0].attributes.fill = color;
   }
   const res = `data:image/svg+xml;base64,${btoa(toHtml(abstract))}`;
-  console.log("HERE");
-  console.log(res);
   return res;
 }
 
