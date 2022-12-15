@@ -59,14 +59,20 @@ export default function Board() {
   function grabPiece(e: React.MouseEvent) {
 
     const element = e.target as HTMLElement;
-    const board = boardRef.current;
+    const board = boardRef.current; 
     if (element.classList.contains("chess-piece") && board) {
-      setGridX(Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE));
       const x = e.clientX - 50;
       const y = e.clientY - 50;
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
+
+      const xFloored = Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE);
+      const yFloored = Math.abs(
+        Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
+      );
+      setGridX(xFloored);
+      setGridY(yFloored);
 
       setActivePiece(element)
     }
@@ -126,7 +132,8 @@ export default function Board() {
       const y = Math.abs(
         Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)
       );
-      console.log(x, y);
+
+      console.log("nearest Block:", x, y);
       
       setPieces( value => {
         const pieces = value.map( p => {
