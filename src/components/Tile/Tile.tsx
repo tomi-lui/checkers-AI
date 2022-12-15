@@ -23,11 +23,11 @@ function getSVGURI(faIcon: IconLookup, color: string): String {
 const chessPiece = (pieceNumber: TeamType) => {
 
   // empty block
-  if (pieceNumber == 0) {
+  if (pieceNumber === 0) {
     return
   }
   
-  const color = (pieceNumber == TeamType.BLUE) ? "blue" : "red";
+  const color = (pieceNumber === TeamType.BLUE) ? "blue" : "red";
   return <div
     className="chess-piece"
     style={{ backgroundImage: `url(${getSVGURI(faCircle, color)})` }}

@@ -151,10 +151,20 @@ export default function Board() {
       setPieces( value => {
         const pieces = value.map( p => {
           if (p.x === gridX && p.y === gridY ) {
-            referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color);
-
-            p.x = x;
-            p.y = y;
+            
+            const validMove = referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color);
+            
+            if (validMove) {
+              p.x = x;
+              p.y = y;
+            }
+            else {
+              activePiece.style.position = 'relative';
+              activePiece.style.removeProperty('top')
+              activePiece.style.removeProperty('left')
+              p.x = gridX;
+              p.y = gridY;
+            }
           }
           return p;
         })

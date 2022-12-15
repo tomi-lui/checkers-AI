@@ -7,14 +7,11 @@ export default class Referee {
         console.log("prev", px, py);
         console.log("curr", x, y);
         console.log("type", type);
-        console.log("team", team);
-        console.log("enum", TeamType.BLUE);
+        console.log("team", team);         
         
-        
-        if (type == PieceType.PAWN) {
-             
+        if (team === TeamType.BLUE) {
+             return false
         }
-        
         
         return true;
     }
