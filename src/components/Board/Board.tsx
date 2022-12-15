@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import Referee from "../../referee/Referee"
 import "./Board.css";
 import Tile from "../Tile/Tile"
 import {
@@ -9,42 +10,53 @@ const horizontalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 
 interface Piece {
-  color: number;
+  color: TeamType;
   x: number;
   y: number;
+  pieceType: PieceType
 }
 
+export enum TeamType {
+  NONE,
+  BLUE,
+  RED
+}
+
+export enum PieceType {
+  PAWN,
+  KING
+}
 
 const initialBoardState: Piece[] = [];
 // initialize blue pieces
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 1) {
-    initialBoardState.push({ color: 1, x: i, y: 7 });
+    initialBoardState.push({ color: 1, x: i, y: 7, pieceType: PieceType.PAWN });
   }
 }
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 0) {
-    initialBoardState.push({ color: 1, x: i, y: 6 });
+    initialBoardState.push({ color: 1, x: i, y: 6, pieceType: PieceType.PAWN});
   }
 }
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 1) {
-    initialBoardState.push({ color: 1, x: i, y: 5 });
+    initialBoardState.push({ color: 1, x: i, y: 5, pieceType: PieceType.PAWN });
   }
 }
 
 // initialize red pieces
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 0)
-  initialBoardState.push({ color: 2, x: i, y: 0 });
+  initialBoardState.push({ color: 2, x: i, y: 0,pieceType: PieceType.PAWN });
 }
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 1)
-  initialBoardState.push({ color: 2, x: i, y: 1 });
+  initialBoardState.push({ color: 2, x: i, y: 1, pieceType: PieceType.PAWN });
 }
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 0)
-  initialBoardState.push({ color: 2, x: i, y: 2 });
+  initialBoardState.push({ color: 2, x: i, y: 2, pieceType: PieceType.PAWN});
 }
 
 
@@ -55,6 +67,8 @@ export default function Board() {
   const [gridX, setGridX] = useState(0);
   const [gridY, setGridY] = useState(0);
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
+
+  const referee = new Referee();
 
   function grabPiece(e: React.MouseEvent) {
 
@@ -133,11 +147,12 @@ export default function Board() {
         Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)
       );
 
-      console.log("nearest Block:", x, y);
-      
+      // update the piece location
       setPieces( value => {
         const pieces = value.map( p => {
           if (p.x === gridX && p.y === gridY ) {
+            referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color);
+
             p.x = x;
             p.y = y;
           }
@@ -177,6 +192,7 @@ export default function Board() {
       board.push(<Tile key={`${j},${i}`} piece={color} number={j + i + 2} />);
     }
   }
+
   return (
     <div
       onMouseMove={e => movePiece(e)}
