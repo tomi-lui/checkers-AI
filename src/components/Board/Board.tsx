@@ -9,7 +9,7 @@ const verticalAxis = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const horizontalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 
-interface Piece {
+export interface Piece {
   color: TeamType;
   x: number;
   y: number;
@@ -139,6 +139,9 @@ export default function Board() {
   function dropPiece(e: React.MouseEvent) {
 
     const chessboard = boardRef.current;
+    const currentPiece = pieces.find(p => p.x === gridX && p.y === gridY);
+    
+
     if (activePiece && chessboard) {
 
       // floor the coordinates
@@ -152,7 +155,7 @@ export default function Board() {
         const pieces = value.map( p => {
           if (p.x === gridX && p.y === gridY ) {
             
-            const validMove = referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color);
+            const validMove = referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color, value);
             
             if (validMove) {
               p.x = x;
