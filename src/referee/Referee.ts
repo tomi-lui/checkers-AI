@@ -51,11 +51,21 @@ export default class Referee {
         boardState: Piece[]
     ): Piece | undefined {
 
-        const yAttackedPieceDirection = (team === TeamType.RED) ? 1 : -1;
-        const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
-        const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
+        if (type == PieceType.PAWN) {
+            const yAttackedPieceDirection = (team === TeamType.RED) ? 1 : -1;
+            const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
+            const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
 
-        return attackedPiece;
+            return attackedPiece;
+
+        } else if (type == PieceType.KING) {
+
+            const yAttackedPieceDirection = (y > py) ? 1 : -1;
+            const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
+            const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
+
+            return attackedPiece;
+        }
     }
 
     isValidMove(
@@ -72,23 +82,52 @@ export default class Referee {
         if (this.tileIsOccupied(x, y, boardState)) {
             return false
         }
-        // get the direction of the piece, red goes up blue goes down
-        const yDirection = (team === TeamType.RED) ? 1 : -1;
 
-        // movement logic
-        if (y - py === (1 * yDirection) && Math.abs(px - x) === 1) {
-            return true
-        }
-        // attack logic
-        if (y - py === (2 * yDirection) && Math.abs(px - x) === 2) {
+        // PAWN RULES
+        if (type === PieceType.PAWN) {
 
-            // return false if there is no pawn to attack
-            if (!this.getAttackedPiece(px, py, x, y, type, team, boardState)) {
-                return false
+            // get the direction of the piece, red goes up blue goes down
+            const yDirection = (team === TeamType.RED) ? 1 : -1;
+
+            // movement logic
+            if (y - py === (1 * yDirection) && Math.abs(px - x) === 1) {
+                return true
             }
+            // attack logic
+            if (y - py === (2 * yDirection) && Math.abs(px - x) === 2) {
 
-            return true;
+                // return false if there is no pawn to attack
+                if (!this.getAttackedPiece(px, py, x, y, type, team, boardState)) {
+                    return false
+                }
+                return true;
+            }
+            return false;
         }
+
+        // KING RULES
+        else if (type === PieceType.KING) {
+
+            // get the direction of the piece, red goes up blue goes down
+
+            // movement logic
+            if (Math.abs(y - py) === 1 && Math.abs(px - x) === 1) {
+                return true
+            }
+            // attack logic
+            if (Math.abs(y - py) === 2 && Math.abs(px - x) === 2) {
+
+                // return false if there is no pawn to attack
+                if (!this.getAttackedPiece(px, py, x, y, type, team, boardState)) {
+                    return false
+                }
+                return true;
+            }
+            return false;
+        }
+
+
         return false;
     }
+
 }

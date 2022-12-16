@@ -7,7 +7,6 @@ import {
 } from "../../Constants"
 
 
-
 const initialBoardState: Piece[] = [];
 // initialize blue pieces
 for (let i = 0; i < 8; i++) {
