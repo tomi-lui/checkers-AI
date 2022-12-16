@@ -1,13 +1,14 @@
 import { IconLookup } from '@fortawesome/fontawesome-svg-core'
-import { faCircle } from '@fortawesome/free-solid-svg-icons'
+import { faCircle, faChessKing } from '@fortawesome/free-solid-svg-icons'
 import { toHtml, icon } from "@fortawesome/fontawesome-svg-core";
 
 import "./Tile.css"
-import { TeamType } from "../Board/Board";
+import { PieceType, TeamType } from '../../Constants';
 
 interface Props {
   number: number;
-  piece: TeamType;
+  pieceTeam: TeamType;
+  pieceType: PieceType;
 }
 
 // helper function to convert font awesome svg to div background
@@ -20,25 +21,26 @@ function getSVGURI(faIcon: IconLookup, color: string): String {
   return res;
 }
 
-const chessPiece = (pieceNumber: TeamType) => {
+const chessPiece = (pieceTeam: TeamType, pieceType: PieceType) => {
 
   // empty block
-  if (pieceNumber === 0) {
+  if (pieceTeam === 0) {
     return
   }
-  
-  const color = (pieceNumber === TeamType.BLUE) ? "blue" : "red";
+
+  const color = (pieceTeam === TeamType.BLUE) ? "blue" : "red";
+  const logo = (pieceType === PieceType.PAWN) ? faCircle : faChessKing;
+
   return <div
     className="chess-piece"
-    style={{ backgroundImage: `url(${getSVGURI(faCircle, color)})` }}
+    style={{ backgroundImage: `url(${getSVGURI(logo, color)})` }}
   />
 }
 
-export default function Tile({ number, piece }: Props) {
+export default function Tile({ number, pieceTeam, pieceType }: Props) {
 
   const tileColor = (number % 2 === 0) ? 'black' : 'white';
-
   return <div className={`tile ${tileColor}-tile`}>
-    {chessPiece(piece)}
+    {chessPiece(pieceTeam, pieceType)}
   </div>
 }

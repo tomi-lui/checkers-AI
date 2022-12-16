@@ -3,29 +3,10 @@ import Referee from "../../referee/Referee"
 import "./Board.css";
 import Tile from "../Tile/Tile"
 import {
-  GRID_SIZE
+  GRID_SIZE, horizontalAxis, Piece, PieceType, verticalAxis
 } from "../../Constants"
-const verticalAxis = ["1", "2", "3", "4", "5", "6", "7", "8"];
-const horizontalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 
-export interface Piece {
-  color: TeamType;
-  x: number;
-  y: number;
-  pieceType: PieceType
-}
-
-export enum TeamType {
-  NONE,
-  BLUE,
-  RED
-}
-
-export enum PieceType {
-  PAWN,
-  KING
-}
 
 const initialBoardState: Piece[] = [];
 // initialize blue pieces
@@ -160,23 +141,30 @@ export default function Board() {
 
           // update the piece position
           // if piece is attacked piece found, remove it
+          const updatedPieces = pieces.reduce((results, piece) => {
 
-          const updatedPieces =  pieces.reduce((results, piece) => {
-              if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
-                // if moved piece found, update its location and put it back into the array
-                piece.x = x;
-                piece.y = y;
-                results.push(piece);
+            // Move the selected piece to its new location
+            if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
+              // if moved piece found, update its location and put it back into the array
+              piece.x = x;
+              piece.y = y;
 
-              } else if (attackedPiece && (piece.x === attackedPiece.x && piece.y === attackedPiece.y)) {
-                // do nothing, do not put the attacked piece back into the array.
-              } else {
-                // if normal piece, put it back into the array
-                results.push(piece)
+              // convert Pawn to King if pawn has reached the end of the board
+              if (piece.pieceType !== PieceType.KING && referee.pawnReachedTheEnd(y, currentPiece.color)) {
+                piece.pieceType = PieceType.KING;
               }
+              results.push(piece);
 
-              return results;
-            }, [] as Piece[])
+              // Delete the attacked piece 
+            } else if (attackedPiece && (piece.x === attackedPiece.x && piece.y === attackedPiece.y)) {
+              // do nothing, do not put the attacked piece back into the array.
+            } else {
+              // if normal piece, put it back into the array
+              results.push(piece)
+            }
+
+            return results;
+          }, [] as Piece[])
 
           setPieces(updatedPieces)
 
@@ -217,12 +205,14 @@ export default function Board() {
     for (let i = 0; i < horizontalAxis.length; i++) {
 
       let color = 0;
+      let pieceType = PieceType.PAWN;
       pieces.forEach((p) => {
         if (p.x === i && p.y === j) {
           color = p.color;
+          pieceType = p.pieceType;
         }
       })
-      board.push(<Tile key={`${j},${i}`} piece={color} number={j + i + 2} />);
+      board.push(<Tile key={`${j},${i}`} pieceTeam={color} number={j + i + 2} pieceType={pieceType} />);
     }
   }
 

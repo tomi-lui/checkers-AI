@@ -1,6 +1,22 @@
-import { Piece, PieceType, TeamType } from "../components/Board/Board";
+import { Piece, PieceType, TeamType } from "../Constants";
 
 export default class Referee {
+
+    /**
+     * Helper function that returns true if pawn has reached the end of the board
+     * @param x pawns new x position
+     * @param y pawns new y position
+     * @param team pawns team color
+     */
+    pawnReachedTheEnd(y: number, team: TeamType): Boolean {
+        if (
+            (team === TeamType.RED && y === 7) ||
+            (team === TeamType.BLUE && y === 0)
+        ) {
+            return true;
+        }
+        return false;
+    }
 
     tileIsOccupied(x: number, y: number, boardState: Piece[]): Boolean {
         // console.log("checking if tile is occupied...");
@@ -52,11 +68,13 @@ export default class Referee {
         boardState: Piece[]
     ): Boolean {
 
+        // return false if user clicked on empty piece
         if (this.tileIsOccupied(x, y, boardState)) {
             return false
         }
-        
+        // get the direction of the piece, red goes up blue goes down
         const yDirection = (team === TeamType.RED) ? 1 : -1;
+
         // movement logic
         if (y - py === (1 * yDirection) && Math.abs(px - x) === 1) {
             return true
@@ -65,7 +83,7 @@ export default class Referee {
         if (y - py === (2 * yDirection) && Math.abs(px - x) === 2) {
 
             // return false if there is no pawn to attack
-            if (!this.getAttackedPiece(px,py,x,y,type,team,boardState)) {
+            if (!this.getAttackedPiece(px, py, x, y, type, team, boardState)) {
                 return false
             }
 
