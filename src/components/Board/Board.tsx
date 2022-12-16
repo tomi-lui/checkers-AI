@@ -36,7 +36,7 @@ for (let i = 0; i < 8; i++) {
 }
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 0) {
-    initialBoardState.push({ color: 1, x: i, y: 6, pieceType: PieceType.PAWN});
+    initialBoardState.push({ color: 1, x: i, y: 6, pieceType: PieceType.PAWN });
   }
 }
 for (let i = 0; i < 8; i++) {
@@ -48,20 +48,20 @@ for (let i = 0; i < 8; i++) {
 // initialize red pieces
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 0)
-  initialBoardState.push({ color: 2, x: i, y: 0,pieceType: PieceType.PAWN });
+    initialBoardState.push({ color: 2, x: i, y: 0, pieceType: PieceType.PAWN });
 }
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 1)
-  initialBoardState.push({ color: 2, x: i, y: 1, pieceType: PieceType.PAWN });
+    initialBoardState.push({ color: 2, x: i, y: 1, pieceType: PieceType.PAWN });
 }
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 0)
-  initialBoardState.push({ color: 2, x: i, y: 2, pieceType: PieceType.PAWN});
+    initialBoardState.push({ color: 2, x: i, y: 2, pieceType: PieceType.PAWN });
 }
 
 
 export default function Board() {
-  
+
   const boardRef = useRef<HTMLElement>(null);
   const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
   const [gridX, setGridX] = useState(0);
@@ -73,7 +73,7 @@ export default function Board() {
   function grabPiece(e: React.MouseEvent) {
 
     const element = e.target as HTMLElement;
-    const board = boardRef.current; 
+    const board = boardRef.current;
     if (element.classList.contains("chess-piece") && board) {
       const x = e.clientX - 50;
       const y = e.clientY - 50;
@@ -139,55 +139,75 @@ export default function Board() {
   function dropPiece(e: React.MouseEvent) {
 
     const chessboard = boardRef.current;
-    const currentPiece = pieces.find(p => p.x === gridX && p.y === gridY);
-    
 
     if (activePiece && chessboard) {
 
-      // floor the coordinates
+      // floor the coordinates to find the nearest placing square
       const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
       const y = Math.abs(
         Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)
       );
 
-      // update the piece location
-      setPieces( value => {
-        const pieces = value.map( p => {
-          if (p.x === gridX && p.y === gridY ) {
-            
-            const validMove = referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color, value);
-            
-            if (validMove) {
-              p.x = x;
-              p.y = y;
-            }
-            else {
-              activePiece.style.position = 'relative';
-              activePiece.style.removeProperty('top')
-              activePiece.style.removeProperty('left')
-              p.x = gridX;
-              p.y = gridY;
-            }
-          }
-          return p;
-        })
-        return pieces;
-      })
+      // find the current piece
+      const currentPiece = pieces.find(p => p.x === gridX && p.y === gridY);
 
-      // const currentPiece = pieces.find((p) =>
-      //   p.samePosition(grabPosition)
-      // );
+      if (currentPiece) {
 
-    //   if (currentPiece) {
-    //     var succes = playMove(currentPiece.clone(), new Position(x, y));
+        const attackedPiece = referee.getAttackedPiece(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
+        const validMove = referee.isValidMove(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
 
-    //     if(!succes) {
-    //       //RESETS THE PIECE POSITION
-    //       activePiece.style.position = "relative";
-    //       activePiece.style.removeProperty("top");
-    //       activePiece.style.removeProperty("left");
-    //     }
-    //   }
+        if (validMove) {
+
+          // update the piece position
+          // if piece is attacked piece found, remove it
+
+          const updatedPieces =  pieces.reduce((results, piece) => {
+              if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
+                // if moved piece found, update its location and put it back into the array
+                piece.x = x;
+                piece.y = y;
+                results.push(piece);
+
+              } else if (attackedPiece && (piece.x === attackedPiece.x && piece.y === attackedPiece.y)) {
+                // do nothing, do not put the attacked piece back into the array.
+              } else {
+                // if normal piece, put it back into the array
+                results.push(piece)
+              }
+
+              return results;
+            }, [] as Piece[])
+
+          setPieces(updatedPieces)
+
+        } else {
+
+          // reset the piece location if it is not a valid move
+          setPieces(value => {
+            const pieces = value.map(p => {
+              if (p.x === gridX && p.y === gridY) {
+
+                const validMove = referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color, value);
+
+                if (validMove) {
+                  p.x = x;
+                  p.y = y;
+                }
+                else {
+                  // reset piece position
+                  activePiece.style.position = 'relative';
+                  activePiece.style.removeProperty('top')
+                  activePiece.style.removeProperty('left')
+                  p.x = gridX;
+                  p.y = gridY;
+                }
+              }
+              return p;
+            })
+            return pieces;
+          })
+        }
+      }
       setActivePiece(null);
     }
   }

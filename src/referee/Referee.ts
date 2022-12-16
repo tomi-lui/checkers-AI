@@ -25,6 +25,23 @@ export default class Referee {
         }
     }
 
+    getAttackedPiece(
+        px: number,
+        py: number,
+        x: number,
+        y: number,
+        type: PieceType,
+        team: TeamType,
+        boardState: Piece[]
+    ): Piece | undefined {
+
+        const yAttackedPieceDirection = (team === TeamType.RED) ? 1 : -1;
+        const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
+        const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
+
+        return attackedPiece;
+    }
+
     isValidMove(
         px: number,
         py: number,
@@ -48,29 +65,29 @@ export default class Referee {
         }
 
         if (team === TeamType.RED) {
-            
+
             // movement logic
-            if ( y - py == 1 && Math.abs(px-x) == 1) {
+            if (y - py === 1 && Math.abs(px - x) === 1) {
                 return true
             }
 
             // attack logic
-            if ( y - py == 2 && Math.abs(px-x) == 2) {
+            if (y - py === 2 && Math.abs(px - x) === 2) {
 
                 // return false if there is no pawn to attack
                 const xDirection = (x - px > 0) ? 1 : -1;
                 if (!this.tileIsOccupiedByOpponent(px + xDirection, py + 1, boardState, team)) {
                     return false;
                 }
-                
+
                 return true;
             }
         }
         else { // team BLUE
             // movement logic 
             if (
-                py - y == 1 &&
-                Math.abs(px-x) == 1
+                py - y === 1 &&
+                Math.abs(px - x) === 1
             ) {
                 return true
             }
