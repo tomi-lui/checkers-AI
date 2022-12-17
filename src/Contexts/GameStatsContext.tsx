@@ -10,7 +10,7 @@ export interface GameStats {
 
 const initialGameStats: GameStats = { redAttacks: 0, blueAttacks: 0, turn: TeamType.RED }
 const GameStatsContext = React.createContext(initialGameStats)
-const GameStatsUpdateContext = React.createContext((teamType:TeamType) => { })
+const GameStatsUpdateContext = React.createContext((teamType: TeamType, attacked:boolean) => { })
 
 
 export function useGameStats() {
@@ -21,6 +21,7 @@ export function useGameStatsUpdate() {
     return useContext(GameStatsUpdateContext)
 }
 
+
 interface Props {
     children?: ReactNode
 }
@@ -29,31 +30,30 @@ export function GameStatsProvider({ children }: Props) {
 
     const [gameStats, setGameStats] = useState(initialGameStats)
 
-    function updateGameStats(teamType: TeamType) {
 
-        console.log(gameStats);
+    function updateGameStats(teamType: TeamType, attacked: boolean) {
+
+        let prevGameStats = {...gameStats}
+        console.log(prevGameStats);
         
-        if (teamType == TeamType.RED) {
-            setGameStats({
-                ...gameStats,
-                redAttacks: gameStats.redAttacks + 1
-            });
-            console.log("red eats");
-            
+        prevGameStats.turn = (teamType === TeamType.RED) ? TeamType.BLUE : TeamType.RED;
 
-        } else if (teamType == TeamType.BLUE) {
-            setGameStats({
-                ...gameStats,
-                redAttacks: gameStats.blueAttacks + 1
-            });
-            console.log("blue eats");
+        if (attacked) {
+            if (teamType == TeamType.RED) {
+                prevGameStats.redAttacks = prevGameStats.redAttacks + 1
+            } else if (teamType == TeamType.BLUE) {
+                prevGameStats.blueAttacks = prevGameStats.blueAttacks + 1 
+            }
         }
+
+        setGameStats(prevGameStats)
+        
     }
 
     return (
         <GameStatsContext.Provider value={gameStats}>
             <GameStatsUpdateContext.Provider value={updateGameStats}>
-                {children}
+                    {children}
             </GameStatsUpdateContext.Provider>
         </GameStatsContext.Provider>
     );

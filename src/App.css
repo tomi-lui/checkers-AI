@@ -1,4 +1,12 @@
+
+.info-section {
+  display: flex;
+  flex-direction:row;
+  justify-content: space-between;
+}
+
 .app {
+
   color: #353C4E;
   background: #F0F2F4;
   display: flex;

@@ -1,11 +1,11 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Referee from "../../referee/Referee"
 import "./Board.css";
 import Tile from "../Tile/Tile"
 import {
   GRID_SIZE, horizontalAxis, Piece, PieceType, verticalAxis
 } from "../../Constants"
-import { useGameStats, useGameStatsUpdate } from "../../Contexts/GameStatsContext";
+import { useGameStats, useGameStatsUpdate} from "../../Contexts/GameStatsContext";
 
 
 const initialBoardState: Piece[] = [];
@@ -160,10 +160,9 @@ export default function Board() {
 
               // Delete the attacked piece 
             } else if (attackedPiece && (piece.x === attackedPiece.x && piece.y === attackedPiece.y)) {
+              
               //do not put the attacked piece back into the array.
               // update the score
-              
-              updateGameStats(piece.color);
 
             } else {
               // if normal piece, put it back into the array
@@ -174,6 +173,8 @@ export default function Board() {
           }, [] as Piece[])
 
           setPieces(updatedPieces)
+          const attacked = (attackedPiece) ? true : false;
+          updateGameStats(currentPiece.color, attacked);
 
         } else {
 
