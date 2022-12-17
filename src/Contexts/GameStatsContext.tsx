@@ -39,10 +39,10 @@ export function GameStatsProvider({ children }: Props) {
         prevGameStats.turn = (teamType === TeamType.RED) ? TeamType.BLUE : TeamType.RED;
 
         if (attacked) {
-            if (teamType == TeamType.RED) {
-                prevGameStats.redAttacks = prevGameStats.redAttacks + 1
-            } else if (teamType == TeamType.BLUE) {
-                prevGameStats.blueAttacks = prevGameStats.blueAttacks + 1 
+            if (teamType === TeamType.RED) {
+                prevGameStats.redAttacks = prevGameStats.redAttacks
+            } else if (teamType === TeamType.BLUE) {
+                prevGameStats.blueAttacks = prevGameStats.blueAttacks
             }
         }
 

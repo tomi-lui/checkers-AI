@@ -5,6 +5,18 @@
   justify-content: space-between;
 }
 
+.turn-block {
+  display: flex;
+  flex-direction:row;
+}
+
+.red-font{
+  color: red;
+}
+.blue-font {
+  color: blue;
+}
+
 .app {
 
   color: #353C4E;

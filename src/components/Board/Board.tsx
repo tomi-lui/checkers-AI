@@ -3,9 +3,10 @@ import Referee from "../../referee/Referee"
 import "./Board.css";
 import Tile from "../Tile/Tile"
 import {
-  GRID_SIZE, horizontalAxis, Piece, PieceType, verticalAxis
+  GRID_SIZE, horizontalAxis, NUM_OF_PIECES_PER_COLOR, Piece, PieceType, TeamType, verticalAxis
 } from "../../Constants"
 import { useGameStats, useGameStatsUpdate} from "../../Contexts/GameStatsContext";
+import { ElementFlags } from "typescript";
 
 
 const initialBoardState: Piece[] = [];
@@ -48,8 +49,8 @@ export default function Board() {
   const [gridY, setGridY] = useState(0);
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
 
-  const gameStats = useGameStats()
   const updateGameStats = useGameStatsUpdate();
+  const gameStats = useGameStats();
 
 
   const referee = new Referee();
@@ -58,7 +59,11 @@ export default function Board() {
 
     const element = e.target as HTMLElement;
     const board = boardRef.current;
-    if (element.classList.contains("chess-piece") && board) {
+    const teamColor = (gameStats.turn === TeamType.RED) ? "red" : "blue";
+    if (
+      element.classList.contains("chess-piece") && 
+      element.classList.contains(teamColor) &&
+      board ) {
       const x = e.clientX - 50;
       const y = e.clientY - 50;
       element.style.position = "absolute";
@@ -175,6 +180,14 @@ export default function Board() {
           setPieces(updatedPieces)
           const attacked = (attackedPiece) ? true : false;
           updateGameStats(currentPiece.color, attacked);
+
+          if (
+            (gameStats.blueAttacks +1) === NUM_OF_PIECES_PER_COLOR || 
+            (gameStats.redAttacks + 1) === NUM_OF_PIECES_PER_COLOR
+          ) {
+            const colorString = currentPiece.color === TeamType.BLUE ? "Blue" : "Red";
+            alert(`${colorString} Won!!!`);
+          }
 
         } else {
 
