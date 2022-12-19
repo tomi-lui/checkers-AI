@@ -1,6 +1,22 @@
 import { Piece, PieceType, TeamType } from "../Constants";
 
 export default class Referee {
+    
+    static possibleMovementDirections = [
+        [-1, -1],
+        [-1, 1],
+        [1, -1],
+        [1, 1]
+    ]
+
+    static possibleAttackDirections = [
+        [-2, -2],
+        [-2, 2],
+        [2, -2],
+        [2, 2]
+    ]
+
+    static NUM_OF_POSSIBLE_DIRECTIONS = 4;
 
     /**
      * Helper function that returns true if pawn has reached the end of the board
@@ -18,7 +34,7 @@ export default class Referee {
         return false;
     }
 
-    tileIsOccupied(x: number, y: number, boardState: Piece[]): Boolean {
+    static tileIsOccupied(x: number, y: number, boardState: Piece[]): Boolean {
         // console.log("checking if tile is occupied...");
 
         const piece = boardState.find(p => p.x === x && p.y === y);
@@ -29,6 +45,7 @@ export default class Referee {
             return false
         }
     }
+
     tileIsOccupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): Boolean {
         // console.log("checking if tile is occupied...");
 
@@ -41,7 +58,33 @@ export default class Referee {
         }
     }
 
-    getAttackedPiece(
+    /**
+     * the enum of TeamType NONE if no winner is found, else
+     * the enum of the winning team.
+     * @param board the 1D array of checkers board
+     * @returns TeamType Enum
+     */
+    public static getWinner(board: Piece[]): TeamType {
+        let redPieces = 0;
+        let bluePieces = 0;
+        for (let i = 0; i < board.length; i++) {
+            const piece = board[i];
+            if (piece.color === TeamType.RED) {
+                redPieces++;
+            } else if (piece.color === TeamType.BLUE) {
+                bluePieces++;
+            }
+        }
+        if (redPieces === 0) {
+            return TeamType.BLUE
+        }
+        else if (bluePieces === 0) {
+            return TeamType.RED
+        }
+        return TeamType.NONE;
+    }
+
+    static getAttackedPiece(
         px: number,
         py: number,
         x: number,
@@ -68,7 +111,54 @@ export default class Referee {
         }
     }
 
-    isValidMove(
+    public static getPossibleMoves(board: Piece[], piece: Piece): number[][] {
+        const moves: number[][] = [];
+        const px: number = piece.x;
+        const py: number = piece.y;
+
+        // checking for possible movement 
+        for (let i = 0; i < this.possibleMovementDirections.length; i++) {
+
+            const movementDirection = this.possibleMovementDirections[i];
+            const attackDirection = this.possibleAttackDirections[i];
+
+            const newMovX = px + movementDirection[0]
+            const newMovY = py + movementDirection[1]
+
+            const newAtkX = px + attackDirection[0]
+            const newAtkY = py + attackDirection[1]
+
+            // checking if movement direction is valid
+            if (this.isValidMove(
+                px,
+                py,
+                newMovX,
+                newMovY,
+                piece.pieceType,
+                piece.color,
+                board)
+            ) {
+                moves.push([newMovX, newMovY]);
+            }
+
+            // checking if attack direction is valid
+            if (this.isValidMove(
+                px,
+                py,
+                newAtkX,
+                newAtkY,
+                piece.pieceType,
+                piece.color,
+                board)
+            ) {
+                moves.push([newAtkX, newAtkY]);
+            }
+        }
+
+        return moves
+    }
+
+    static isValidMove(
         px: number,
         py: number,
         x: number,

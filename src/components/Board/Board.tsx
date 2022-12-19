@@ -6,7 +6,6 @@ import {
   GRID_SIZE, horizontalAxis, NUM_OF_PIECES_PER_COLOR, Piece, PieceType, TeamType, verticalAxis
 } from "../../Constants"
 import { useGameStats, useGameStatsUpdate} from "../../Contexts/GameStatsContext";
-import { ElementFlags } from "typescript";
 
 
 const initialBoardState: Piece[] = [];
@@ -239,6 +238,7 @@ export default function Board() {
 
   return (
     <div
+      className="board"
       onMouseMove={e => movePiece(e)}
       onMouseDown={e => grabPiece(e)}
       onMouseUp={e => dropPiece(e)}
