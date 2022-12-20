@@ -1,11 +1,12 @@
-import React, { useRef, useState } from "react";
-import Referee from "../../referee/Referee"
+import React, { useEffect, useRef, useState } from "react";
+import Referee, { Position } from "../../referee/Referee"
 import "./Board.css";
 import Tile from "../Tile/Tile"
 import {
   GRID_SIZE, horizontalAxis, NUM_OF_PIECES_PER_COLOR, Piece, PieceType, TeamType, verticalAxis
 } from "../../Constants"
-import { useGameStats, useGameStatsUpdate} from "../../Contexts/GameStatsContext";
+import { useGameStats, useGameStatsUpdate } from "../../Contexts/GameStatsContext";
+import { Checkers_AI } from "../../minimax/algorithm";
 
 
 const initialBoardState: Piece[] = [];
@@ -44,34 +45,36 @@ export default function Board() {
 
   const boardRef = useRef<HTMLElement>(null);
   const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
-  const [gridX, setGridX] = useState(0);
-  const [gridY, setGridY] = useState(0);
+  const [originalPosition, setOriginalPosition] = useState({ x: -1, y: -1 })
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
 
   const updateGameStats = useGameStatsUpdate();
   const gameStats = useGameStats();
 
+  // useEffect(() => {
+  //   // console.log("rendered");
+  // }, [pieces])
+
   function grabPiece(e: React.MouseEvent) {
 
     const element = e.target as HTMLElement;
     const board = boardRef.current;
-    const teamColor = (gameStats.turn === TeamType.RED) ? "red" : "blue";
+    // const teamColor = (gameStats.turn === TeamType.RED) ? "red" : "blue";
     if (
-      element.classList.contains("chess-piece") && 
-      element.classList.contains(teamColor) &&
-      board ) {
+      element.classList.contains("chess-piece") &&
+      element.classList.contains("red") &&
+      board) {
       const x = e.clientX - 50;
       const y = e.clientY - 50;
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
 
-      const xFloored = Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE);
-      const yFloored = Math.abs(
-        Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
-      );
-      setGridX(xFloored);
-      setGridY(yFloored);
+      setOriginalPosition({
+        x: Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE),
+        y: Math.abs(Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
+        )
+      })
 
       setActivePiece(element)
     }
@@ -128,32 +131,33 @@ export default function Board() {
     if (activePiece && chessboard) {
 
       // floor the coordinates to find the nearest placing square
-      const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
-      const y = Math.abs(
-        Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)
-      );
+      const newPosition: Position = {
+        x: Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE),
+        y: Math.abs(
+          Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)
+        )
+      }
 
       // find the current piece
-      const currentPiece = pieces.find(p => p.x === gridX && p.y === gridY);
+      const currentPiece = pieces.find(p => p.x === originalPosition.x && p.y === originalPosition.y);
 
       if (currentPiece) {
 
-        const attackedPiece = Referee.getAttackedPiece(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
-        const validMove = Referee.isValidMove(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
+        const attackedPiece = Referee.getAttackedPiece(originalPosition, newPosition, currentPiece.pieceType, currentPiece.color, pieces);
+        const validMove = Referee.isValidMove(originalPosition, newPosition, currentPiece.pieceType, currentPiece.color, pieces);
 
         if (validMove) {
+          console.log("valid");
+          
 
           // return a new board with new piece position and update it
-          const updatedPieces = Referee.movePiece(pieces, currentPiece, x,y,attackedPiece);
-          setPieces(updatedPieces)
-          
-          const attacked = (attackedPiece) ? true : false;
-          updateGameStats(currentPiece.color, attacked);
+          const updatedPieces = Referee.movePiece(pieces, currentPiece, newPosition, attackedPiece);
+          const { pieces: newPieces, score } = Checkers_AI.minimax(updatedPieces, 2, true);
+          setPieces(newPieces)
+          updateGameStats(TeamType.BLUE, false)
 
-          if (
-            (gameStats.blueAttacks +1) === NUM_OF_PIECES_PER_COLOR || 
-            (gameStats.redAttacks + 1) === NUM_OF_PIECES_PER_COLOR
-          ) {
+          // alert if we have a winner
+          if (Referee.getWinner(pieces) !== TeamType.NONE) {
             const colorString = currentPiece.color === TeamType.BLUE ? "Blue" : "Red";
             alert(`${colorString} Won!!!`);
           }
@@ -163,21 +167,21 @@ export default function Board() {
           // reset the piece location if it is not a valid move
           setPieces(value => {
             const pieces = value.map(p => {
-              if (p.x === gridX && p.y === gridY) {
+              if (p.x === originalPosition.x && p.y === originalPosition.y) {
 
-                const validMove = Referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color, value);
+                const validMove = Referee.isValidMove(originalPosition, newPosition, p.pieceType, p.color, value);
 
                 if (validMove) {
-                  p.x = x;
-                  p.y = y;
+                  p.x = newPosition.x;
+                  p.y = newPosition.y;
                 }
                 else {
                   // reset piece position
                   activePiece.style.position = 'relative';
                   activePiece.style.removeProperty('top')
                   activePiece.style.removeProperty('left')
-                  p.x = gridX;
-                  p.y = gridY;
+                  p.x = originalPosition.x;
+                  p.y = originalPosition.y;
                 }
               }
               return p;

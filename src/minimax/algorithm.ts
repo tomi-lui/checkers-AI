@@ -11,17 +11,16 @@ export class Checkers_AI {
      * @param board 1D array of the board
      * @returns a new copy of the board
      */
-    static deepCopy(board: Piece[]): Piece[] {
-        const copyBoard: Piece[] = [];
-        for (let i = 0; i < board.length; i++) {
-            const piece = board[i];
-            copyBoard.push(piece)
+    static deepCopy(pieces: Piece[]): Piece[] {
+        const copyPieces: Piece[] = [];
+        for (let i = 0; i < pieces.length; i++) {
+            const piece = pieces[i];
+            // const copyPiece: Piece = {...piece}
+            copyPieces.push({...piece})
+            // copyPieces.push(piece)
         }
-        return copyBoard
+        return copyPieces
     }
-
-    // evaluate board: returns a score
-    // blue == white
 
     static countPieces(board: Piece[], color: TeamType, countKingsOnly: boolean = false): Piece[] {
         const pieces: Piece[] = [];
@@ -42,7 +41,7 @@ export class Checkers_AI {
     }
 
     /**
-     * incentivize AI to gain as many kings as they can
+     * returns a score of AI
      * @param board array of pieces
      */
     static evaluate(board: Piece[]): number {
@@ -54,24 +53,20 @@ export class Checkers_AI {
         return blueNumPieces - redNumPieces + (blueNumKings * 0.5 - redNumKings * 0.5)
     }
 
-    // get valid moves, should be implemented from referee
-
-    // get all pieces of a given color
-
-    // ai move returns the new ai board
-
     /**
      * 
      * @param board the 1D array of checkers board
      * @param depth how far do we want to calculate the tree of possibilities
      * @param max_player is the algorithm minimizing the value or maximizing the value
      */
-    static minimax(board: Piece[], depth: number, max_player: boolean): {score: number, board:Piece[]} {
-
+    static minimax(board: Piece[], depth: number, max_player: boolean): {score: number, pieces:Piece[]} {
+        // console.log("called");
+        
         // only evaluate if we reached the end of the tree
         if (depth === 0 || Referee.getWinner(board) != TeamType.NONE) {
-            return {score:this.evaluate(board), board}
+            return {score:this.evaluate(board), pieces: board}
         }
+        
         if (max_player) {
             let maxEval = this.NEG_INF;
             let bestMove = null;
@@ -84,7 +79,7 @@ export class Checkers_AI {
                     bestMove = move
                 }
             }
-            return {score:maxEval, board}
+            return {score:maxEval, pieces: board}
         } else {
             let minEval = this.POS_INF;
             let bestMove = null;
@@ -92,44 +87,41 @@ export class Checkers_AI {
             for (let i = 0; i < allMoves.length; i++) {
                 const move = allMoves[i];
                 const evaluation = this.minimax(move, depth-1, true).score;
-                minEval = Math.max(minEval, evaluation)
+                minEval = Math.min(minEval, evaluation)
                 if (minEval == evaluation) {
                     bestMove = move
                 }
             }
-            return {score:minEval, board}
+            return {score:minEval, pieces: board}
         }
     }
 
     /**
      * Stores an array <MOVE, 
-     * @param board 1D array of the board
+     * @param pieces 1D array of the board
      * @param color team color
      */
-    static getAllMoves(board: Piece[], color: TeamType): Piece[][] {
+    static getAllMoves(pieces: Piece[], color: TeamType): Piece[][] {
         // stores the possible moves for all possible pieces in a board format
         let moves: Piece[][] = []
-        const piecesForCurrentColor = this.countPieces(board, color, false);
+        const piecesForCurrentColor = this.countPieces(pieces, color, false);
 
         for (let i = 0; i < piecesForCurrentColor.length; i++) {
             const currentPiece = piecesForCurrentColor[i];
-            const validMoves = Referee.getPossibleMoves(board, currentPiece)
+            const validMoves = Referee.getPossibleMoves(pieces, currentPiece)
 
-            for (let move of Array.from(validMoves.keys())) {
-                const attackedPiece = validMoves.get(move);
-                const tempBoard = this.deepCopy(board)
-                // const newBoard = this.simulateMove(piece, move, tempBoard, attackedPiece)
-                const newBoard = Referee.movePiece(tempBoard, currentPiece, move.x, move.y, attackedPiece);
+            for (let possibleMovePosition of Array.from(validMoves.keys())) {
+                const attackedPiece = validMoves.get(possibleMovePosition);
+                const tempPieces = this.deepCopy(pieces)
+                const tempPiece = {...currentPiece}
+                // const tempPiece:Piece = {...currentPiece}
+                // const newBoard = this.simulateMove(piece, move, tempPieces, attackedPiece)
+                const newBoard = Referee.movePiece(tempPieces, tempPiece, possibleMovePosition, attackedPiece);
                 moves.push(newBoard)
             }
         }
         return moves
     }
-
-    // static simulateMove(piece: Piece, move: Position, board: Piece[], attackedPieces: Piece[]): Piece[] {
-    //     const updatedBoard = this.move(board, piece, move.x, move.y, attackedPieces[0]);
-    // }
-
 
     // return new AI move
     aiMove(board: Piece[]) {

@@ -76,8 +76,7 @@ export default class Referee {
     static movePiece(
         board: Piece[],
         currentPiece: Piece,
-        x: number,
-        y: number,
+        newPosition:Position,
         attackedPiece: Piece | null | undefined = null):
         Piece[] {
         const updatedPieces = board.reduce((results, piece) => {
@@ -85,11 +84,11 @@ export default class Referee {
             // Move the selected piece to its new location
             if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
                 // if moved piece found, update its location and put it back into the array
-                piece.x = x;
-                piece.y = y;
+                piece.x = newPosition.x;
+                piece.y = newPosition.y;
 
                 // convert Pawn to King if pawn has reached the end of the board
-                if (piece.pieceType !== PieceType.KING && Referee.pawnReachedTheEnd(y, currentPiece.color)) {
+                if (piece.pieceType !== PieceType.KING && Referee.pawnReachedTheEnd(newPosition.y, currentPiece.color)) {
                     piece.pieceType = PieceType.KING;
                 }
                 results.push(piece);
@@ -137,10 +136,8 @@ export default class Referee {
     }
 
     static getAttackedPiece(
-        px: number,
-        py: number,
-        x: number,
-        y: number,
+        prevPosition: Position,
+        newPosition: Position,
         type: PieceType,
         team: TeamType,
         boardState: Piece[]
@@ -148,16 +145,16 @@ export default class Referee {
 
         if (type === PieceType.PAWN) {
             const yAttackedPieceDirection = (team === TeamType.RED) ? 1 : -1;
-            const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
-            const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
+            const xAttackedPieceDirection = (newPosition.x - prevPosition.x > 0) ? 1 : -1;
+            const attackedPiece = boardState.find(p => p.x === (prevPosition.x + xAttackedPieceDirection) && p.y === (prevPosition.y + yAttackedPieceDirection));
 
             return attackedPiece;
 
         } else if (type === PieceType.KING) {
 
-            const yAttackedPieceDirection = (y > py) ? 1 : -1;
-            const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
-            const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
+            const yAttackedPieceDirection = (newPosition.y > prevPosition.y) ? 1 : -1;
+            const xAttackedPieceDirection = (newPosition.x - prevPosition.x > 0) ? 1 : -1;
+            const attackedPiece = boardState.find(p => p.x === (prevPosition.x + xAttackedPieceDirection) && p.y === (prevPosition.y + yAttackedPieceDirection));
 
             return attackedPiece;
         }
@@ -189,10 +186,8 @@ export default class Referee {
 
             // checking if movement direction is valid
             if (this.isValidMove(
-                PrevPosition.x,
-                PrevPosition.y,
-                newMovPosition.x,
-                newMovPosition.y,
+                PrevPosition,
+                newMovPosition,
                 piece.pieceType,
                 piece.color,
                 board)
@@ -202,10 +197,8 @@ export default class Referee {
 
             // checking if attack direction is valid
             if (this.isValidMove(
-                PrevPosition.x,
-                PrevPosition.y,
-                newAtkPosition.x,
-                newAtkPosition.y,
+                PrevPosition,
+                newAtkPosition,
                 piece.pieceType,
                 piece.color,
                 board)
@@ -224,17 +217,15 @@ export default class Referee {
     }
 
     static isValidMove(
-        px: number,
-        py: number,
-        x: number,
-        y: number,
+        prevPosition:Position,
+        newPosition: Position,
         type: PieceType,
         team: TeamType,
         boardState: Piece[]
     ): Boolean {
 
         // return false if user clicked on empty piece
-        if (this.tileIsOccupied(x, y, boardState)) {
+        if (this.tileIsOccupied(newPosition.x, newPosition.y, boardState)) {
             return false
         }
 
@@ -245,14 +236,14 @@ export default class Referee {
             const yDirection = (team === TeamType.RED) ? 1 : -1;
 
             // movement logic
-            if (y - py === (1 * yDirection) && Math.abs(px - x) === 1) {
+            if (newPosition.y - prevPosition.y === (1 * yDirection) && Math.abs(prevPosition.x - newPosition.x) === 1) {
                 return true
             }
             // attack logic
-            if (y - py === (2 * yDirection) && Math.abs(px - x) === 2) {
+            if (newPosition.y - prevPosition.y === (2 * yDirection) && Math.abs(prevPosition.x - newPosition.x) === 2) {
 
                 // return false if there is no pawn to attack
-                if (!this.getAttackedPiece(px, py, x, y, type, team, boardState)) {
+                if (!this.getAttackedPiece(prevPosition, newPosition, type, team, boardState)) {
                     return false
                 }
                 return true;
@@ -266,14 +257,14 @@ export default class Referee {
             // get the direction of the piece, red goes up blue goes down
 
             // movement logic
-            if (Math.abs(y - py) === 1 && Math.abs(px - x) === 1) {
+            if (Math.abs(newPosition.y - prevPosition.y) === 1 && Math.abs(prevPosition.x - newPosition.x) === 1) {
                 return true
             }
             // attack logic
-            if (Math.abs(y - py) === 2 && Math.abs(px - x) === 2) {
+            if (Math.abs(newPosition.y - prevPosition.y) === 2 && Math.abs(prevPosition.x - newPosition.x) === 2) {
 
                 // return false if there is no pawn to attack
-                if (!this.getAttackedPiece(px, py, x, y, type, team, boardState)) {
+                if (!this.getAttackedPiece(prevPosition, newPosition, type, team, boardState)) {
                     return false
                 }
                 return true;
