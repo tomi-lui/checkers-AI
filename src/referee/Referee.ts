@@ -1,7 +1,21 @@
 import { Piece, PieceType, TeamType } from "../Constants";
 
+export interface Position {
+    x: number,
+    y: number
+}
+
+export interface Skips {
+    skip: number[][];
+}
+
+export interface ValidMove {
+    move: Position;
+    skip: number[][];
+}
+
 export default class Referee {
-    
+
     static possibleMovementDirections = [
         [-1, -1],
         [-1, 1],
@@ -24,7 +38,7 @@ export default class Referee {
      * @param y pawns new y position
      * @param team pawns team color
      */
-    pawnReachedTheEnd(y: number, team: TeamType): Boolean {
+    static pawnReachedTheEnd(y: number, team: TeamType): Boolean {
         if (
             (team === TeamType.RED && y === 7) ||
             (team === TeamType.BLUE && y === 0)
@@ -111,51 +125,64 @@ export default class Referee {
         }
     }
 
-    public static getPossibleMoves(board: Piece[], piece: Piece): number[][] {
-        const moves: number[][] = [];
-        const px: number = piece.x;
-        const py: number = piece.y;
+    public static getPossibleMoves(board: Piece[], piece: Piece): Map<Position, Piece | null> {
 
-        // checking for possible movement 
-        for (let i = 0; i < this.possibleMovementDirections.length; i++) {
+        const validMoves: Map<Position, Piece | null> = new Map();
+
+        const PrevPosition: Position = {
+            x: piece.x,
+            y: piece.y
+        }
+
+        // checking for possible movement/attack directions
+        for (let i = 0; i < this.NUM_OF_POSSIBLE_DIRECTIONS; i++) {
 
             const movementDirection = this.possibleMovementDirections[i];
             const attackDirection = this.possibleAttackDirections[i];
 
-            const newMovX = px + movementDirection[0]
-            const newMovY = py + movementDirection[1]
-
-            const newAtkX = px + attackDirection[0]
-            const newAtkY = py + attackDirection[1]
+            const newMovPosition: Position = {
+                x: piece.x + movementDirection[0],
+                y: piece.y + movementDirection[1]
+            }
+            const newAtkPosition: Position = {
+                x: piece.x + attackDirection[0],
+                y: piece.y + attackDirection[1]
+            }
 
             // checking if movement direction is valid
             if (this.isValidMove(
-                px,
-                py,
-                newMovX,
-                newMovY,
+                PrevPosition.x,
+                PrevPosition.y,
+                newMovPosition.x,
+                newMovPosition.y,
                 piece.pieceType,
                 piece.color,
                 board)
             ) {
-                moves.push([newMovX, newMovY]);
+                validMoves.set(newMovPosition, null);
             }
 
             // checking if attack direction is valid
             if (this.isValidMove(
-                px,
-                py,
-                newAtkX,
-                newAtkY,
+                PrevPosition.x,
+                PrevPosition.y,
+                newAtkPosition.x,
+                newAtkPosition.y,
                 piece.pieceType,
                 piece.color,
                 board)
             ) {
-                moves.push([newAtkX, newAtkY]);
+                const attackedPiece = board.find(p =>
+                    p.x === (PrevPosition.x + newMovPosition.x) &&
+                    p.y === (PrevPosition.y + newMovPosition.y)
+                );
+                if (attackedPiece) {
+                    validMoves.set(newMovPosition, attackedPiece)
+                }
             }
         }
 
-        return moves
+        return validMoves
     }
 
     static isValidMove(

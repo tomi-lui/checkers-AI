@@ -141,8 +141,8 @@ export default function Board() {
 
       if (currentPiece) {
 
-        const attackedPiece = referee.getAttackedPiece(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
-        const validMove = referee.isValidMove(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
+        const attackedPiece = Referee.getAttackedPiece(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
+        const validMove = Referee.isValidMove(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
 
         if (validMove) {
 
@@ -157,7 +157,7 @@ export default function Board() {
               piece.y = y;
 
               // convert Pawn to King if pawn has reached the end of the board
-              if (piece.pieceType !== PieceType.KING && referee.pawnReachedTheEnd(y, currentPiece.color)) {
+              if (piece.pieceType !== PieceType.KING && Referee.pawnReachedTheEnd(y, currentPiece.color)) {
                 piece.pieceType = PieceType.KING;
               }
               results.push(piece);
@@ -195,7 +195,7 @@ export default function Board() {
             const pieces = value.map(p => {
               if (p.x === gridX && p.y === gridY) {
 
-                const validMove = referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color, value);
+                const validMove = Referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color, value);
 
                 if (validMove) {
                   p.x = x;
