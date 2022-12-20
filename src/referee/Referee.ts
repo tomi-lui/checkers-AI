@@ -72,6 +72,44 @@ export default class Referee {
         }
     }
 
+
+    static movePiece(
+        board: Piece[],
+        currentPiece: Piece,
+        x: number,
+        y: number,
+        attackedPiece: Piece | null | undefined = null):
+        Piece[] {
+        const updatedPieces = board.reduce((results, piece) => {
+
+            // Move the selected piece to its new location
+            if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
+                // if moved piece found, update its location and put it back into the array
+                piece.x = x;
+                piece.y = y;
+
+                // convert Pawn to King if pawn has reached the end of the board
+                if (piece.pieceType !== PieceType.KING && Referee.pawnReachedTheEnd(y, currentPiece.color)) {
+                    piece.pieceType = PieceType.KING;
+                }
+                results.push(piece);
+
+                // Delete the attacked piece 
+            } else if (attackedPiece && (piece.x === attackedPiece.x && piece.y === attackedPiece.y)) {
+
+                //do not put the attacked piece back into the array.
+                // update the score
+
+            } else {
+                // if normal piece, put it back into the array
+                results.push(piece)
+            }
+
+            return results;
+        }, [] as Piece[])
+        return updatedPieces;
+    }
+
     /**
      * the enum of TeamType NONE if no winner is found, else
      * the enum of the winning team.
@@ -108,14 +146,14 @@ export default class Referee {
         boardState: Piece[]
     ): Piece | undefined {
 
-        if (type == PieceType.PAWN) {
+        if (type === PieceType.PAWN) {
             const yAttackedPieceDirection = (team === TeamType.RED) ? 1 : -1;
             const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
             const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
 
             return attackedPiece;
 
-        } else if (type == PieceType.KING) {
+        } else if (type === PieceType.KING) {
 
             const yAttackedPieceDirection = (y > py) ? 1 : -1;
             const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;

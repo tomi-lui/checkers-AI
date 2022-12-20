@@ -51,9 +51,6 @@ export default function Board() {
   const updateGameStats = useGameStatsUpdate();
   const gameStats = useGameStats();
 
-
-  const referee = new Referee();
-
   function grabPiece(e: React.MouseEvent) {
 
     const element = e.target as HTMLElement;
@@ -146,37 +143,10 @@ export default function Board() {
 
         if (validMove) {
 
-          // update the piece position
-          // if piece is attacked piece found, remove it
-          const updatedPieces = pieces.reduce((results, piece) => {
-
-            // Move the selected piece to its new location
-            if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
-              // if moved piece found, update its location and put it back into the array
-              piece.x = x;
-              piece.y = y;
-
-              // convert Pawn to King if pawn has reached the end of the board
-              if (piece.pieceType !== PieceType.KING && Referee.pawnReachedTheEnd(y, currentPiece.color)) {
-                piece.pieceType = PieceType.KING;
-              }
-              results.push(piece);
-
-              // Delete the attacked piece 
-            } else if (attackedPiece && (piece.x === attackedPiece.x && piece.y === attackedPiece.y)) {
-              
-              //do not put the attacked piece back into the array.
-              // update the score
-
-            } else {
-              // if normal piece, put it back into the array
-              results.push(piece)
-            }
-
-            return results;
-          }, [] as Piece[])
-
+          // return a new board with new piece position and update it
+          const updatedPieces = Referee.movePiece(pieces, currentPiece, x,y,attackedPiece);
           setPieces(updatedPieces)
+          
           const attacked = (attackedPiece) ? true : false;
           updateGameStats(currentPiece.color, attacked);
 

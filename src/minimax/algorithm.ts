@@ -119,7 +119,7 @@ export class Checkers_AI {
                 const attackedPiece = validMoves.get(move);
                 const tempBoard = this.deepCopy(board)
                 // const newBoard = this.simulateMove(piece, move, tempBoard, attackedPiece)
-                const newBoard = this.move(tempBoard, currentPiece, move.x, move.y, attackedPiece);
+                const newBoard = Referee.movePiece(tempBoard, currentPiece, move.x, move.y, attackedPiece);
                 moves.push(newBoard)
             }
         }
@@ -130,42 +130,6 @@ export class Checkers_AI {
     //     const updatedBoard = this.move(board, piece, move.x, move.y, attackedPieces[0]);
     // }
 
-    static move(
-        board: Piece[],
-        currentPiece: Piece,
-        x: number,
-        y: number,
-        attackedPiece: Piece | null | undefined = null):
-        Piece[] {
-        const updatedPieces = board.reduce((results, piece) => {
-
-            // Move the selected piece to its new location
-            if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
-                // if moved piece found, update its location and put it back into the array
-                piece.x = x;
-                piece.y = y;
-
-                // convert Pawn to King if pawn has reached the end of the board
-                if (piece.pieceType !== PieceType.KING && Referee.pawnReachedTheEnd(y, currentPiece.color)) {
-                    piece.pieceType = PieceType.KING;
-                }
-                results.push(piece);
-
-                // Delete the attacked piece 
-            } else if (attackedPiece && (piece.x === attackedPiece.x && piece.y === attackedPiece.y)) {
-
-                //do not put the attacked piece back into the array.
-                // update the score
-
-            } else {
-                // if normal piece, put it back into the array
-                results.push(piece)
-            }
-
-            return results;
-        }, [] as Piece[])
-        return updatedPieces;
-    }
 
     // return new AI move
     aiMove(board: Piece[]) {
