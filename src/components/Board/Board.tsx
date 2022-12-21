@@ -56,15 +56,16 @@ export default function Board() {
     const board = boardRef.current;
     if (element.classList.contains("chess-piece") && board) {
       const x = e.clientX - 50;
-      const y = e.clientY - 50;
+      const y = e.clientY + 50;
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
 
       const xFloored = Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE);
       const yFloored = Math.abs(
-        Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
+        Math.ceil(((e.clientY + 80 )- board.offsetTop - 800) / GRID_SIZE)
       );
+      console.log("x and y floored", xFloored, yFloored);
       setGridX(xFloored);
       setGridY(yFloored);
 
@@ -83,7 +84,7 @@ export default function Board() {
       const maxY = board.offsetTop + board.clientHeight - 75;
 
       const x = e.clientX - 50;
-      const y = e.clientY - 50;
+      const y = e.clientY + 50;
 
       activePiece.style.position = "absolute";
       activePiece.style.left = `${x}px`;
@@ -125,7 +126,7 @@ export default function Board() {
       // floor the coordinates to find the nearest placing square
       const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
       const y = Math.abs(
-        Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)
+        Math.ceil(((e.clientY + 80 )- chessboard.offsetTop - 800) / GRID_SIZE)
       );
 
       // find the current piece
@@ -135,9 +136,9 @@ export default function Board() {
 
         const attackedPiece = referee.getAttackedPiece(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
         const validMove = referee.isValidMove(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
-
+        
         if (validMove) {
-
+          
           // update the piece position
           // if piece is attacked piece found, remove it
           const updatedPieces = pieces.reduce((results, piece) => {
@@ -174,20 +175,12 @@ export default function Board() {
             const pieces = value.map(p => {
               if (p.x === gridX && p.y === gridY) {
 
-                const validMove = referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color, value);
-
-                if (validMove) {
-                  p.x = x;
-                  p.y = y;
-                }
-                else {
                   // reset piece position
                   activePiece.style.position = 'relative';
                   activePiece.style.removeProperty('top')
                   activePiece.style.removeProperty('left')
                   p.x = gridX;
                   p.y = gridY;
-                }
               }
               return p;
             })

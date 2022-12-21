@@ -10,7 +10,7 @@
 }
 
 .tile .chess-piece:active {
-  curor: grabbing;
+  cursor: grabbing;
 }
 
 .black-tile {
