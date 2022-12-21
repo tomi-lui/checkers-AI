@@ -61,14 +61,14 @@ export default function Board() {
       element.classList.contains(teamColor) &&
       board ) {
       const x = e.clientX - 50;
-      const y = e.clientY - 50;
+      const y = e.clientY + 60;
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
 
       const xFloored = Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE);
       const yFloored = Math.abs(
-        Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
+        Math.ceil(((e.clientY + 80 )- board.offsetTop - 800) / GRID_SIZE)
       );
       setGridX(xFloored);
       setGridY(yFloored);
@@ -88,7 +88,7 @@ export default function Board() {
       const maxY = board.offsetTop + board.clientHeight - 75;
 
       const x = e.clientX - 50;
-      const y = e.clientY - 50;
+      const y = e.clientY + 50;
 
       activePiece.style.position = "absolute";
       activePiece.style.left = `${x}px`;
@@ -130,7 +130,7 @@ export default function Board() {
       // floor the coordinates to find the nearest placing square
       const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
       const y = Math.abs(
-        Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)
+        Math.ceil(((e.clientY + 80)- chessboard.offsetTop - 800) / GRID_SIZE)
       );
 
       // find the current piece
