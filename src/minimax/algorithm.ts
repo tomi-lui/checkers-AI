@@ -1,6 +1,6 @@
 import Board from "../components/Board/Board";
 import { Piece, PieceType, TeamType } from "../Constants";
-import Referee, { Position } from "../referee/Referee";
+import Referee from "../referee/Referee";
 export class Checkers_AI {
 
     static NEG_INF = Number.NEGATIVE_INFINITY

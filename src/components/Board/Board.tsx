@@ -51,10 +51,6 @@ export default function Board() {
   const updateGameStats = useGameStatsUpdate();
   const gameStats = useGameStats();
 
-  // useEffect(() => {
-  //   // console.log("rendered");
-  // }, [pieces])
-
   function grabPiece(e: React.MouseEvent) {
 
     const element = e.target as HTMLElement;
