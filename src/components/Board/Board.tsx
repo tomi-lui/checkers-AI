@@ -3,11 +3,10 @@ import Referee, { Position } from "../../referee/Referee"
 import "./Board.css";
 import Tile from "../Tile/Tile"
 import {
-  GRID_SIZE, horizontalAxis, Piece, PieceType, TeamType, verticalAxis
+  GRID_SIZE, horizontalAxis, MINIMAX_DEPTH, Piece, PieceType, TeamType, verticalAxis
 } from "../../Constants"
 import { useGameStats, useGameStatsUpdate } from "../../Contexts/GameStatsContext";
 import { Checkers_AI } from "../../minimax/algorithm";
-import { JsxElement } from "typescript";
 
 
 const initialBoardState: Piece[] = [];
@@ -61,17 +60,41 @@ export default function Board() {
 
         let color = 0;
         let pieceType = PieceType.PAWN;
+        let x = i;
+        let y = j;
         pieces.forEach((p) => {
           if (p.x === i && p.y === j) {
             color = p.color;
             pieceType = p.pieceType;
           }
         })
-        tempBoard.push(<Tile key={`${j},${i}`} pieceTeam={color} number={j + i + 2} pieceType={pieceType} />);
+        tempBoard.push(<Tile
+          id={`xy${x}_${y}`}
+          key={`${j},${i}`}
+          pieceTeam={color}
+          number={j + i + 2}
+          pieceType={pieceType}
+        />);
       }
     }
     setBoard(tempBoard)
   }, [pieces])
+
+
+  function extractCordinates(classes: string[]) {
+    let x = -1;
+    let y = -1;
+    classes.forEach(c => {
+      if (c.includes('xy')) {
+        let s = c.split('_')
+        x = parseInt(s[0].slice(2))
+        y = parseInt(s[1])
+      }
+    })
+    console.log(x, y);
+
+    return { x, y }
+  }
 
   function grabPiece(e: React.MouseEvent) {
 
@@ -83,6 +106,8 @@ export default function Board() {
       element.classList.contains("red") &&
       board) {
 
+      const { x:originalX, y :originalY} = extractCordinates(Array.from(element.classList))
+
       const x = e.clientX - 50;
       const y = e.clientY - 50;
       element.style.position = "absolute";
@@ -90,11 +115,9 @@ export default function Board() {
       element.style.top = `${y}px`;
 
       setOriginalPosition({
-        x: Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE),
-        y: Math.abs(Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
-        )
+        x: originalX,
+        y: originalY,
       })
-
       setActivePiece(element)
     }
   }
@@ -145,6 +168,7 @@ export default function Board() {
 
   function dropPiece(e: React.MouseEvent) {
 
+    let newPieces = null;
     const chessboard = boardRef.current;
 
     if (activePiece && chessboard) {
@@ -169,10 +193,12 @@ export default function Board() {
 
           // return a new board with new piece position and update it
           const movedPieces = Referee.movePiece(pieces, currentPiece, newPosition, attackedPiece);
-          const { pieces: AIPieces } = Checkers_AI.minimax(movedPieces, 2, true);
+          const { pieces: AIPieces } = Checkers_AI.minimax(movedPieces, MINIMAX_DEPTH, true);
+          newPieces = AIPieces
 
-          setPieces(AIPieces)
-          // updateGameStats(TeamType.BLUE, false)
+          if (newPieces) {
+            setPieces(newPieces)
+          }
 
           // alert if we have a winner
           if (Referee.getWinner(pieces) !== TeamType.NONE) {
