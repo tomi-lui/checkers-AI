@@ -1,4 +1,5 @@
 import { Piece, PieceType, TeamType } from "../Constants";
+import { Checkers_AI } from "../minimax/algorithm";
 
 export interface Position {
     x: number,
@@ -79,7 +80,9 @@ export default class Referee {
         newPosition: Position,
         attackedPiece: Piece | null | undefined = null):
         Piece[] {
-        const updatedPieces = board.reduce((results, piece) => {
+
+        const newBoard = Checkers_AI.deepCopy(board)
+        const updatedPieces = newBoard.reduce((results, piece) => {
 
             // Move the selected piece to its new location
             if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
@@ -199,18 +202,19 @@ export default class Referee {
             }
 
             // checking if attack direction is valid
-            if (this.isValidMove(
+            else if (this.isValidMove(
                 PrevPosition,
                 newAtkPosition,
                 piece.pieceType,
                 piece.color,
                 board)
             ) {
-                const attackedPiece = board.find(p =>
-                    p.x === (PrevPosition.x + newMovPosition.x) &&
-                    p.y === (PrevPosition.y + newMovPosition.y)
-                );
+                const attackedPiece = this.getAttackedPiece(PrevPosition, newAtkPosition, piece.pieceType, piece.color, board)
+
                 if (attackedPiece) {
+                    console.log(piece.x, piece.y, piece.color);
+
+                    console.log(attackedPiece);
                     validMoves.set(newAtkPositionJSONString, attackedPiece)
                 }
             }

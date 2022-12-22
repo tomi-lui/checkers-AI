@@ -16,8 +16,8 @@ export class Checkers_AI {
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i];
             // const copyPiece: Piece = {...piece}
-            // copyPieces.push({...piece})
-            copyPieces.push(piece)
+            copyPieces.push({...piece})
+            // copyPieces.push(piece)
         }
         return copyPieces
     }
@@ -118,6 +118,7 @@ export class Checkers_AI {
                     // console.log(possiblePosition);
                     
                     const attackedPiece = validMoves.get(possibleMovePositionString);
+                    
                     const tempPieces = this.deepCopy(pieces)
                     const tempPiece = { ...currentPiece }
                     // const tempPiece:Piece = {...currentPiece}

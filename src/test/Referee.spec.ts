@@ -41,7 +41,7 @@ function instantiateBoard() {
 }
 
 describe('Move Piece', () => {
-    it.skip('Referee to support moving a piece.', () => {
+    it('Referee to support moving a piece.', () => {
 
         let originalPieces = instantiateBoard();
         let movedPieces = Referee.movePiece(originalPieces, { x: 2, y: 2, color: TeamType.RED, pieceType: PieceType.PAWN }, { x: 3, y: 3 });
