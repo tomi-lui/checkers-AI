@@ -60,25 +60,19 @@ export default function Board() {
       element.classList.contains("chess-piece") &&
       element.classList.contains("red") &&
       board) {
-      
+
       const x = e.clientX - 50;
       const y = e.clientY - 50;
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
 
-      console.log("board top", board.offsetTop);
-      console.log("clientY", e.clientY)
-      console.log("board left", board.offsetLeft);
-      
-      
-
       setOriginalPosition({
         x: Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE),
         y: Math.abs(Math.ceil((e.clientY - board.offsetTop - 800) / GRID_SIZE)
         )
       })
-      
+
       setActivePiece(element)
     }
   }
@@ -150,8 +144,6 @@ export default function Board() {
         const validMove = Referee.isValidMove(originalPosition, newPosition, currentPiece.pieceType, currentPiece.color, pieces);
 
         if (validMove) {
-          console.log("valid");
-          
 
           // return a new board with new piece position and update it
           const updatedPieces = Referee.movePiece(pieces, currentPiece, newPosition, attackedPiece);
@@ -172,20 +164,12 @@ export default function Board() {
             const pieces = value.map(p => {
               if (p.x === originalPosition.x && p.y === originalPosition.y) {
 
-                const validMove = Referee.isValidMove(originalPosition, newPosition, p.pieceType, p.color, value);
-
-                if (validMove) {
-                  p.x = newPosition.x;
-                  p.y = newPosition.y;
-                }
-                else {
-                  // reset piece position
-                  activePiece.style.position = 'relative';
-                  activePiece.style.removeProperty('top')
-                  activePiece.style.removeProperty('left')
-                  p.x = originalPosition.x;
-                  p.y = originalPosition.y;
-                }
+                // reset piece position
+                activePiece.style.position = 'relative';
+                activePiece.style.removeProperty('top')
+                activePiece.style.removeProperty('left')
+                p.x = originalPosition.x;
+                p.y = originalPosition.y;
               }
               return p;
             })

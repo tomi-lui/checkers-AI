@@ -76,7 +76,7 @@ export default class Referee {
     static movePiece(
         board: Piece[],
         currentPiece: Piece,
-        newPosition:Position,
+        newPosition: Position,
         attackedPiece: Piece | null | undefined = null):
         Piece[] {
         const updatedPieces = board.reduce((results, piece) => {
@@ -160,9 +160,9 @@ export default class Referee {
         }
     }
 
-    public static getPossibleMoves(board: Piece[], piece: Piece): Map<Position, Piece | null> {
+    public static getPossibleMovesForPiece(board: Piece[], piece: Piece): Map<string, Piece | null> {
 
-        const validMoves: Map<Position, Piece | null> = new Map();
+        const validMoves: Map<string, Piece | null> = new Map();
 
         const PrevPosition: Position = {
             x: piece.x,
@@ -179,10 +179,13 @@ export default class Referee {
                 x: piece.x + movementDirection[0],
                 y: piece.y + movementDirection[1]
             }
+            const newMovePositionJSONString = JSON.stringify(newMovPosition)
+
             const newAtkPosition: Position = {
                 x: piece.x + attackDirection[0],
                 y: piece.y + attackDirection[1]
             }
+            const newAtkPositionJSONString = JSON.stringify(newAtkPosition)
 
             // checking if movement direction is valid
             if (this.isValidMove(
@@ -192,7 +195,7 @@ export default class Referee {
                 piece.color,
                 board)
             ) {
-                validMoves.set(newMovPosition, null);
+                validMoves.set(newMovePositionJSONString, null);
             }
 
             // checking if attack direction is valid
@@ -208,16 +211,15 @@ export default class Referee {
                     p.y === (PrevPosition.y + newMovPosition.y)
                 );
                 if (attackedPiece) {
-                    validMoves.set(newMovPosition, attackedPiece)
+                    validMoves.set(newAtkPositionJSONString, attackedPiece)
                 }
             }
         }
-
         return validMoves
     }
 
     static isValidMove(
-        prevPosition:Position,
+        prevPosition: Position,
         newPosition: Position,
         type: PieceType,
         team: TeamType,
@@ -225,7 +227,13 @@ export default class Referee {
     ): Boolean {
 
         // return false if user clicked on empty piece
-        if (this.tileIsOccupied(newPosition.x, newPosition.y, boardState)) {
+        if (
+            this.tileIsOccupied(newPosition.x, newPosition.y, boardState) ||
+            newPosition.x < 0 ||
+            newPosition.y > 7 ||
+            newPosition.x < 0 ||
+            newPosition.y > 7
+        ) {
             return false
         }
 
@@ -236,11 +244,15 @@ export default class Referee {
             const yDirection = (team === TeamType.RED) ? 1 : -1;
 
             // movement logic
-            if (newPosition.y - prevPosition.y === (1 * yDirection) && Math.abs(prevPosition.x - newPosition.x) === 1) {
+            if (
+                newPosition.y - prevPosition.y === (1 * yDirection) &&
+                Math.abs(prevPosition.x - newPosition.x) === 1) {
                 return true
             }
             // attack logic
-            if (newPosition.y - prevPosition.y === (2 * yDirection) && Math.abs(prevPosition.x - newPosition.x) === 2) {
+            if (
+                newPosition.y - prevPosition.y === (2 * yDirection) &&
+                Math.abs(prevPosition.x - newPosition.x) === 2) {
 
                 // return false if there is no pawn to attack
                 if (!this.getAttackedPiece(prevPosition, newPosition, type, team, boardState)) {

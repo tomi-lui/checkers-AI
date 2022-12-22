@@ -41,13 +41,36 @@ function instantiateBoard() {
 }
 
 describe('minimax', () => {
-  it('should return the correct score and pieces for the given board and depth', () => {
+  it.skip('should return the correct score and pieces for the given board and depth', () => {
 
-    const board = instantiateBoard();
-    const depth = 2;
-    const maxPlayer = true;
+    let originalPieces = instantiateBoard();
 
-    const result = Checkers_AI.minimax(board, depth, maxPlayer);
-    expect(result).toEqual({ score: -1, pieces: board });
+    originalPieces = Referee.movePiece(
+      originalPieces,
+      { x: 2, y: 2, color: TeamType.RED, pieceType: PieceType.PAWN },
+      { x: 3, y: 3 }
+    );
+
+    const { pieces: newPieces } = Checkers_AI.minimax(originalPieces, 2, true);
+    expect(newPieces).not.toEqual(originalPieces);
   });
 });
+
+describe('get all moves for a team', () => {
+  it.only('returns a list of pieces, where each `pieces` represents the board after moving a piece', () => {
+
+    let originalPieces = instantiateBoard();
+    const allPossibleMoves = Checkers_AI.getAllMovesForTeam(originalPieces, TeamType.RED);
+    expect(allPossibleMoves.length).toBe(7)
+  });
+});
+
+
+      // let movedRedX3Y3 = instantiateBoard();
+      // movedRedX3Y3 = Referee.movePiece(movedRedX3Y3, { x: 2, y: 2, color: TeamType.RED, pieceType: PieceType.PAWN }, { x: 3, y: 3 });
+  
+      // let movedRedX1Y1 = instantiateBoard();
+      // movedRedX1Y1 = Referee.movePiece(movedRedX3Y3, { x: 2, y: 2, color: TeamType.RED, pieceType: PieceType.PAWN }, { x: 1, y: 3 });
+  
+
+
