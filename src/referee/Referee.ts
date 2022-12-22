@@ -1,4 +1,4 @@
-import { Piece, PieceType, TeamType } from "../Constants";
+import { NUM_OF_PIECES_PER_COLOR, Piece, PieceType, TeamType } from "../Constants";
 import { Checkers_AI } from "../minimax/algorithm";
 
 export interface Position {
@@ -62,8 +62,6 @@ export default class Referee {
     }
 
     tileIsOccupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): Boolean {
-        // console.log("checking if tile is occupied...");
-
         const piece = boardState.find(p => p.x === x && p.y === y && p.color !== team);
 
         if (piece) {

@@ -48,10 +48,6 @@ export default function Board() {
   const [originalPosition, setOriginalPosition] = useState({ x: -1, y: -1 })
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
 
-  const updateGameStats = useGameStatsUpdate();
-  const gameStats = useGameStats();
-
-
   const [board, setBoard] = useState<any>()
   const [toggle, setToggle] = useState(false)
 
@@ -90,15 +86,11 @@ export default function Board() {
       const { pieces: AIPieces } = Checkers_AI.minimax(pieces, MINIMAX_DEPTH, true);
       setPieces(AIPieces)
       setToggle(false)
+      alertIfWinner()
     }
   }, [pieces])
 
-  useEffect(() => {
-    // setActivePiece(null)
-  }, [activePiece])
-
-
-
+  // extract x and y coordinates from css class
   function extractCordinates(classes: string[]) {
     let x = -1;
     let y = -1;
@@ -214,7 +206,6 @@ export default function Board() {
         const validMove = Referee.isValidMove(originalPosition, newPosition, currentPiece.pieceType, currentPiece.color, pieces);
 
         if (validMove) {
-
           // return a new board with new piece position and update it
           const movedPieces = Referee.movePiece(pieces, currentPiece, newPosition);
           setPieces(movedPieces);
@@ -240,17 +231,20 @@ export default function Board() {
         setPieces(newPieces)
       }
       setToggle(true)
-      alertIfWinner();
+      // alertIfWinner();
       setActivePiece(null);
     }
   }
 
   function alertIfWinner() {
-    const winner = Referee.getWinner(pieces);
     // alert if we have a winner
-    if (winner !== TeamType.NONE) {
-      const colorString = (winner === TeamType.BLUE) ? "Blue" : "Red";
-      alert(`${colorString} Won!!!`);
+    console.log("red", Checkers_AI.countPieces(pieces, TeamType.RED).length);
+    
+    if (Checkers_AI.countPieces(pieces, TeamType.BLUE).length === 0) {
+      alert(`BLUE Won!!!`);
+    }
+    if (Checkers_AI.countPieces(pieces, TeamType.RED).length === 1) {
+      alert(`RED Won!!!`);
     }
   }
 
