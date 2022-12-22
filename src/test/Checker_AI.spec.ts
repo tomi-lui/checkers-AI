@@ -42,17 +42,17 @@ function instantiateBoard() {
 }
 
 describe('minimax', () => {
-  it.skip('should return the correct score and pieces for the given board and depth', () => {
+  it('should return the correct score and pieces for the given board and depth', () => {
 
     let originalPieces = instantiateBoard();
 
-    originalPieces = Referee.movePiece(
+    let movedPieces = Referee.movePiece(
       originalPieces,
       { x: 2, y: 2, color: TeamType.RED, pieceType: PieceType.PAWN },
       { x: 3, y: 3 }
     );
 
-    const { pieces: newPieces } = Checkers_AI.minimax(originalPieces, 2, true);
+    const { pieces: newPieces } = Checkers_AI.minimax(movedPieces, 2, true);
     expect(newPieces).not.toEqual(originalPieces);
   });
 });
