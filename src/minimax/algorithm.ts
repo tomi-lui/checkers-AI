@@ -54,7 +54,7 @@ export class Checkers_AI {
     }
 
     /**
-     * 
+     * Implemented MINIMAX depth first search algorithm to return the best possible move for team BLUE
      * @param board the 1D array of checkers board
      * @param depth how far do we want to calculate the tree of possibilities
      * @param max_player is the algorithm minimizing the value or maximizing the value
@@ -127,14 +127,10 @@ export class Checkers_AI {
 
                 const possiblePosition = JSON.parse(possibleMovePositionString);
                 if (possiblePosition) {
-                    
-                    const attackedPiece = validMoves.get(possibleMovePositionString);
-                    
+                                        
                     const tempPieces = this.deepCopy(pieces)
                     const tempPiece = { ...currentPiece }
-                    // const tempPiece:Piece = {...currentPiece}
-                    // const newBoard = this.simulateMove(piece, move, tempPieces, attackedPiece)
-                    const newBoard = Referee.movePiece(tempPieces, tempPiece, possiblePosition, attackedPiece);
+                    const newBoard = Referee.movePiece(tempPieces, tempPiece, possiblePosition);
                     moves.push(newBoard)
                 }
             }

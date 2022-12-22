@@ -34,8 +34,8 @@ const chessPiece = (pieceTeam: TeamType, pieceType: PieceType, id:string) => {
 
   const team = (pieceTeam === TeamType.RED) ? "red" : "blue";
   return <div
-    className={`chess-piece ${team}  ${id}`}
-    style={{ backgroundImage: `url(${getSVGURI(logo, color)})` }}
+    className={`chess-piece ${team}  ${id} `}
+    style={{ backgroundImage: `url(${getSVGURI(logo, color)})` , position: 'relative'}}
   />
 }
 

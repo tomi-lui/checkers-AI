@@ -77,11 +77,13 @@ export default class Referee {
     static movePiece(
         board: Piece[],
         currentPiece: Piece,
-        newPosition: Position,
-        attackedPiece: Piece | null | undefined = null):
+        newPosition: Position
+        // attackedPiece: Piece | null | undefined = null
+    ):
         Piece[] {
-
+        
         const newBoard = Checkers_AI.deepCopy(board)
+        const attackedPiece = this.getAttackedPiece({x: currentPiece.x, y:currentPiece.y},newPosition, currentPiece.pieceType, currentPiece.color, board );
         const updatedPieces = newBoard.reduce((results, piece) => {
 
             // Move the selected piece to its new location
