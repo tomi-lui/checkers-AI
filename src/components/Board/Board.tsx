@@ -3,10 +3,11 @@ import Referee, { Position } from "../../referee/Referee"
 import "./Board.css";
 import Tile from "../Tile/Tile"
 import {
-  GRID_SIZE, horizontalAxis, NUM_OF_PIECES_PER_COLOR, Piece, PieceType, TeamType, verticalAxis
+  GRID_SIZE, horizontalAxis, Piece, PieceType, TeamType, verticalAxis
 } from "../../Constants"
 import { useGameStats, useGameStatsUpdate } from "../../Contexts/GameStatsContext";
 import { Checkers_AI } from "../../minimax/algorithm";
+import { JsxElement } from "typescript";
 
 
 const initialBoardState: Piece[] = [];
@@ -50,6 +51,27 @@ export default function Board() {
 
   const updateGameStats = useGameStatsUpdate();
   const gameStats = useGameStats();
+
+  const [board, setBoard] = useState<any>()
+
+  useEffect(() => {
+    const tempBoard = []
+    for (let j = verticalAxis.length - 1; j >= 0; j--) {
+      for (let i = 0; i < horizontalAxis.length; i++) {
+
+        let color = 0;
+        let pieceType = PieceType.PAWN;
+        pieces.forEach((p) => {
+          if (p.x === i && p.y === j) {
+            color = p.color;
+            pieceType = p.pieceType;
+          }
+        })
+        tempBoard.push(<Tile key={`${j},${i}`} pieceTeam={color} number={j + i + 2} pieceType={pieceType} />);
+      }
+    }
+    setBoard(tempBoard)
+  }, [pieces])
 
   function grabPiece(e: React.MouseEvent) {
 
@@ -149,17 +171,6 @@ export default function Board() {
           const movedPieces = Referee.movePiece(pieces, currentPiece, newPosition, attackedPiece);
           const { pieces: AIPieces } = Checkers_AI.minimax(movedPieces, 2, true);
 
-          for (let i = 0; i < movedPieces.length; i++) {
-            const before = movedPieces[i];
-            const after = AIPieces[i];
-            if (before.x === after.x && before.y === after.y) {
-              console.log("same");
-            }
-            else {
-              console.log("diff");
-            }
-          }
-
           setPieces(AIPieces)
           // updateGameStats(TeamType.BLUE, false)
 
@@ -190,22 +201,6 @@ export default function Board() {
         }
       }
       setActivePiece(null);
-    }
-  }
-
-  let board = [];
-  for (let j = verticalAxis.length - 1; j >= 0; j--) {
-    for (let i = 0; i < horizontalAxis.length; i++) {
-
-      let color = 0;
-      let pieceType = PieceType.PAWN;
-      pieces.forEach((p) => {
-        if (p.x === i && p.y === j) {
-          color = p.color;
-          pieceType = p.pieceType;
-        }
-      })
-      board.push(<Tile key={`${j},${i}`} pieceTeam={color} number={j + i + 2} pieceType={pieceType} />);
     }
   }
 
