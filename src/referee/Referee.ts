@@ -150,7 +150,11 @@ export default class Referee {
             const yAttackedPieceDirection = (team === TeamType.RED) ? 1 : -1;
             const xAttackedPieceDirection = (newPosition.x - prevPosition.x > 0) ? 1 : -1;
             const attackedPiece = boardState.find(p => p.x === (prevPosition.x + xAttackedPieceDirection) && p.y === (prevPosition.y + yAttackedPieceDirection));
+            const currentPiece = boardState.find(p => p.x === prevPosition.x && p.y === prevPosition.y);
 
+            if (attackedPiece?.color === currentPiece?.color) {
+                return undefined;
+            }
             return attackedPiece;
 
         } else if (type === PieceType.KING) {
@@ -212,9 +216,6 @@ export default class Referee {
                 const attackedPiece = this.getAttackedPiece(PrevPosition, newAtkPosition, piece.pieceType, piece.color, board)
 
                 if (attackedPiece) {
-                    console.log(piece.x, piece.y, piece.color);
-
-                    console.log(attackedPiece);
                     validMoves.set(newAtkPositionJSONString, attackedPiece)
                 }
             }
@@ -234,9 +235,9 @@ export default class Referee {
         if (
             this.tileIsOccupied(newPosition.x, newPosition.y, boardState) ||
             newPosition.x < 0 ||
+            newPosition.x > 7 ||
             newPosition.y > 7 ||
-            newPosition.x < 0 ||
-            newPosition.y > 7
+            newPosition.y < 0
         ) {
             return false
         }
@@ -250,7 +251,8 @@ export default class Referee {
             // movement logic
             if (
                 newPosition.y - prevPosition.y === (1 * yDirection) &&
-                Math.abs(prevPosition.x - newPosition.x) === 1) {
+                Math.abs(prevPosition.x - newPosition.x) === 1
+            ) {
                 return true
             }
             // attack logic

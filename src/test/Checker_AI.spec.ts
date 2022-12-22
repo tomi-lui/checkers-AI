@@ -52,17 +52,17 @@ describe('minimax', () => {
       { x: 3, y: 3 }
     );
 
-    const { pieces: newPieces } = Checkers_AI.minimax(movedPieces, 2, true);
-    expect(newPieces).not.toEqual(originalPieces);
+    const { score, pieces: newPieces } = Checkers_AI.minimax(movedPieces, 2, true);
+    expect(movedPieces).not.toEqual(newPieces);
+
   });
 });
 
 describe('get all moves for a team', () => {
-  it.skip('returns a list of pieces, where each `pieces` represents the board after moving a piece', () => {
+  it('returns a list of pieces, where each `pieces` represents the board after moving a piece', () => {
 
     let possibleMove1 = instantiateBoard();
     possibleMove1 = Referee.movePiece(possibleMove1, { x: 0, y: 2, color: TeamType.RED, pieceType: PieceType.PAWN }, { x: 1, y: 3 });
-
 
     let originalPieces = instantiateBoard();
     const allPossibleMoves = Checkers_AI.getAllMovesForTeam(originalPieces, TeamType.RED);
@@ -70,13 +70,11 @@ describe('get all moves for a team', () => {
 
     expect(allPossibleMoves[0].length).toEqual(24)
     expect(allPossibleMoves[1].length).toEqual(24)
-    // expect(allPossibleMoves[2].length).toEqual(24)
-    // expect(allPossibleMoves).toEqual(originalPieces)
+    expect(allPossibleMoves[2].length).toEqual(24)
     expect(allPossibleMoves[3].length).toEqual(24)
-    // expect(allPossibleMoves[4].length).toEqual(24)
+    expect(allPossibleMoves[4].length).toEqual(24)
     expect(allPossibleMoves[5].length).toEqual(24)
     expect(allPossibleMoves[6].length).toEqual(24)
-    // expect(allPossibleMoves[7].length).toEqual(24)
 
   });
 });

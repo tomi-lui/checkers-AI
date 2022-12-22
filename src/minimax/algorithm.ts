@@ -15,7 +15,6 @@ export class Checkers_AI {
         const copyPieces: Piece[] = [];
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i];
-            // const copyPiece: Piece = {...piece}
             copyPieces.push({...piece})
             // copyPieces.push(piece)
         }
@@ -51,6 +50,7 @@ export class Checkers_AI {
         let redNumKings: number = this.countPieces(board, TeamType.RED, true).length;
 
         return blueNumPieces - redNumPieces + (blueNumKings * 0.5 - redNumKings * 0.5)
+        // return blueNumPieces - redNumPieces 
     }
 
     /**
@@ -59,10 +59,13 @@ export class Checkers_AI {
      * @param depth how far do we want to calculate the tree of possibilities
      * @param max_player is the algorithm minimizing the value or maximizing the value
      */
-    static minimax(board: Piece[], depth: number, max_player: boolean): { score: number, pieces: Piece[] } {
+    static minimax(currentBoard: Piece[], depth: number, max_player: boolean): { score: number, pieces: Piece[] } {
+        
+        // is this necessary?
+        let board = this.deepCopy(currentBoard)
 
         // only evaluate if we reached the end of the tree
-        if (depth === 0 || Referee.getWinner(board) != TeamType.NONE) {
+        if (depth === 0 || Referee.getWinner(board) != TeamType.NONE) {            
             return { score: this.evaluate(board), pieces: board }
         }
 
@@ -76,11 +79,16 @@ export class Checkers_AI {
 
                 const evaluation = this.minimax(move, depth - 1, false).score;
                 maxEval = Math.max(maxEval, evaluation)
+
                 if (maxEval == evaluation) {
                     bestMove = move
                 }
+
             }
-            return { score: maxEval, pieces: board }
+            if (bestMove == null) {
+                bestMove = board
+            }
+            return { score: maxEval, pieces: bestMove }
         } else {
             let minEval = this.POS_INF;
             let bestMove = null;
@@ -89,11 +97,15 @@ export class Checkers_AI {
                 const move = allMoves[i];
                 const evaluation = this.minimax(move, depth - 1, true).score;
                 minEval = Math.min(minEval, evaluation)
+
                 if (minEval == evaluation) {
                     bestMove = move
                 }
             }
-            return { score: minEval, pieces: board }
+            if (bestMove == null) {
+                bestMove = board
+            }
+            return { score: minEval, pieces: bestMove }
         }
     }
 
@@ -106,7 +118,7 @@ export class Checkers_AI {
         // stores the possible moves for all possible pieces in a board format
         let moves: Piece[][] = []
         const piecesForCurrentColor = this.countPieces(pieces, color, false);
-
+        
         for (let i = 0; i < piecesForCurrentColor.length; i++) {
             const currentPiece = piecesForCurrentColor[i];
             const validMoves = Referee.getPossibleMovesForPiece(pieces, currentPiece)
@@ -115,7 +127,6 @@ export class Checkers_AI {
 
                 const possiblePosition = JSON.parse(possibleMovePositionString);
                 if (possiblePosition) {
-                    // console.log(possiblePosition);
                     
                     const attackedPiece = validMoves.get(possibleMovePositionString);
                     

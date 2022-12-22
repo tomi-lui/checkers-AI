@@ -146,10 +146,22 @@ export default function Board() {
         if (validMove) {
 
           // return a new board with new piece position and update it
-          const updatedPieces = Referee.movePiece(pieces, currentPiece, newPosition, attackedPiece);
-          const { pieces: newPieces, score } = Checkers_AI.minimax(updatedPieces, 2, true);
-          setPieces(newPieces)
-          updateGameStats(TeamType.BLUE, false)
+          const movedPieces = Referee.movePiece(pieces, currentPiece, newPosition, attackedPiece);
+          const { pieces: AIPieces } = Checkers_AI.minimax(movedPieces, 2, true);
+
+          for (let i = 0; i < movedPieces.length; i++) {
+            const before = movedPieces[i];
+            const after = AIPieces[i];
+            if (before.x === after.x && before.y === after.y) {
+              console.log("same");
+            }
+            else {
+              console.log("diff");
+            }
+          }
+
+          setPieces(AIPieces)
+          // updateGameStats(TeamType.BLUE, false)
 
           // alert if we have a winner
           if (Referee.getWinner(pieces) !== TeamType.NONE) {

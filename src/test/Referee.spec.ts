@@ -47,8 +47,11 @@ describe('Move Piece', () => {
         let movedPieces = Referee.movePiece(originalPieces, { x: 2, y: 2, color: TeamType.RED, pieceType: PieceType.PAWN }, { x: 3, y: 3 });
 
         let movedPiece = movedPieces.find(p => p.x === 3 && p.y === 3)
+        let previousPiece = movedPieces.find(p => p.x === 2 && p.y === 2)
+
         expect(originalPieces).not.toEqual(movedPieces);
         expect(movedPiece).toBeDefined();
+        expect(previousPiece).toBeUndefined()
     });
 });
 
