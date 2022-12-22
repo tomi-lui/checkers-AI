@@ -1,4 +1,4 @@
-import { NUM_OF_PIECES_PER_COLOR, Piece, PieceType, TeamType } from "../Constants";
+import { Piece, PieceType, TeamType } from "../Constants";
 import { Checkers_AI } from "../minimax/algorithm";
 
 export interface Position {
@@ -49,6 +49,13 @@ export default class Referee {
         return false;
     }
 
+    /**
+     * true if the tile is occupied
+     * @param x x axis of the tile
+     * @param y y axis of the tile
+     * @param boardState array of pieces
+     * @returns true if the tile is occupied
+     */
     static tileIsOccupied(x: number, y: number, boardState: Piece[]): Boolean {
         // console.log("checking if tile is occupied...");
 
@@ -61,6 +68,13 @@ export default class Referee {
         }
     }
 
+    /**
+     * true if the tile is occupied by opponent
+     * @param x x axis of the tile
+     * @param y y axis of the tile
+     * @param boardState array of pieces
+     * @returns true if the tile is occupied opponent
+     */
     tileIsOccupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): Boolean {
         const piece = boardState.find(p => p.x === x && p.y === y && p.color !== team);
 
@@ -71,7 +85,13 @@ export default class Referee {
         }
     }
 
-
+    /**
+     * helper function to handle logic for moving a piece
+     * @param board Array of all the pieces
+     * @param currentPiece the piece you want to move
+     * @param newPosition the location of the new piece you want to move it to
+     * @returns an updated version of all the pieces
+     */
     static movePiece(
         board: Piece[],
         currentPiece: Piece,
@@ -138,6 +158,15 @@ export default class Referee {
         return TeamType.NONE;
     }
 
+    /**
+     * returns a Piece if there is a piece to attack, else undefined
+     * @param prevPosition previous position of moving piece
+     * @param newPosition new position of the moving piece
+     * @param type type of the piece, king or pawn
+     * @param team color of the piece, blue or red
+     * @param boardState array of all the pieces
+     * @returns returns a Piece if there is a piece to attack
+     */
     static getAttackedPiece(
         prevPosition: Position,
         newPosition: Position,
@@ -167,6 +196,12 @@ export default class Referee {
         }
     }
 
+    /**
+     * returns a Map where the key is the piece location, value is whether or not it skips a pieace
+     * @param board array of all the pieces
+     * @param piece the peace you want to get the possible moves for
+     * @returns a Map where the key is the piece location, value is whether or not it skips a pieace
+     */
     public static getPossibleMovesForPiece(board: Piece[], piece: Piece): Map<string, Piece | null> {
 
         const validMoves: Map<string, Piece | null> = new Map();
@@ -223,6 +258,15 @@ export default class Referee {
         return validMoves
     }
 
+    /**
+     * returns true if the move is legal
+     * @param prevPosition previous position of the moving piece
+     * @param newPosition new position of the moving piece
+     * @param type type of the piece, pawn or king
+     * @param team team color of the piece
+     * @param boardState array of all the pieces
+     * @returns true if the move is legal
+     */
     static isValidMove(
         prevPosition: Position,
         newPosition: Position,

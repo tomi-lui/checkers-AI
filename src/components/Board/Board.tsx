@@ -6,7 +6,6 @@ import {
   BOARD_HEIGHT,
   GRID_SIZE, horizontalAxis, MINIMAX_DEPTH, Piece, PieceType, TeamType, verticalAxis
 } from "../../Constants"
-import { useGameStats, useGameStatsUpdate } from "../../Contexts/GameStatsContext";
 import { Checkers_AI } from "../../minimax/algorithm";
 
 
@@ -86,8 +85,8 @@ export default function Board() {
       const { pieces: AIPieces } = Checkers_AI.minimax(pieces, MINIMAX_DEPTH, true);
       setPieces(AIPieces)
       setToggle(false)
-      alertIfWinner()
     }
+    alertIfWinner()
   }, [pieces])
 
   // extract x and y coordinates from css class
@@ -107,6 +106,7 @@ export default function Board() {
     return { x, y }
   }
 
+  // hanlde grabbing piece
   function grabPiece(e: React.MouseEvent) {
 
     const element = e.target as HTMLElement;
@@ -136,6 +136,7 @@ export default function Board() {
     }
   }
 
+  // update element/piece location as you drag the piece
   function movePiece(e: React.MouseEvent) {
 
     const board = boardRef.current;
@@ -183,6 +184,7 @@ export default function Board() {
     }
   }
 
+  // handle dropping/placing the piece on the tile
   function dropPiece(e: React.MouseEvent) {
 
     let newPieces = null;
@@ -239,11 +241,11 @@ export default function Board() {
   function alertIfWinner() {
     // alert if we have a winner
     console.log("red", Checkers_AI.countPieces(pieces, TeamType.RED).length);
-    
+
     if (Checkers_AI.countPieces(pieces, TeamType.BLUE).length === 0) {
       alert(`BLUE Won!!!`);
     }
-    if (Checkers_AI.countPieces(pieces, TeamType.RED).length === 1) {
+    if (Checkers_AI.countPieces(pieces, TeamType.RED).length === 0) {
       alert(`RED Won!!!`);
     }
   }

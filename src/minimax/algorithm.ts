@@ -1,4 +1,3 @@
-import Board from "../components/Board/Board";
 import { Piece, PieceType, TeamType } from "../Constants";
 import Referee from "../referee/Referee";
 export class Checkers_AI {
@@ -16,11 +15,17 @@ export class Checkers_AI {
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i];
             copyPieces.push({...piece})
-            // copyPieces.push(piece)
         }
         return copyPieces
     }
 
+    /**
+     * return an array of all the selected pieces by color 
+     * @param board Array of all pieces
+     * @param color the color of the pieces you want to count
+     * @param countKingsOnly boolean for if you want to count kings only
+     * @returns an array of all the selected pieces by color 
+     */
     static countPieces(board: Piece[], color: TeamType, countKingsOnly: boolean = false): Piece[] {
         const pieces: Piece[] = [];
         for (let i = 0; i < board.length; i++) {
@@ -65,7 +70,7 @@ export class Checkers_AI {
         let board = this.deepCopy(currentBoard)
 
         // only evaluate if we reached the end of the tree
-        if (depth === 0 || Referee.getWinner(board) != TeamType.NONE) {            
+        if (depth === 0 || Referee.getWinner(board) !== TeamType.NONE) {            
             return { score: this.evaluate(board), pieces: board }
         }
 
@@ -80,12 +85,12 @@ export class Checkers_AI {
                 const evaluation = this.minimax(move, depth - 1, false).score;
                 maxEval = Math.max(maxEval, evaluation)
 
-                if (maxEval == evaluation) {
+                if (maxEval === evaluation) {
                     bestMove = move
                 }
 
             }
-            if (bestMove == null) {
+            if (bestMove === null) {
                 bestMove = board
             }
             return { score: maxEval, pieces: bestMove }
@@ -98,11 +103,11 @@ export class Checkers_AI {
                 const evaluation = this.minimax(move, depth - 1, true).score;
                 minEval = Math.min(minEval, evaluation)
 
-                if (minEval == evaluation) {
+                if (minEval === evaluation) {
                     bestMove = move
                 }
             }
-            if (bestMove == null) {
+            if (bestMove === null) {
                 bestMove = board
             }
             return { score: minEval, pieces: bestMove }
