@@ -1,4 +1,5 @@
 import { Piece, PieceType, TeamType } from "../Constants";
+import { Checkers_AI } from "../minimax/algorithm";
 
 export interface Position {
     x: number,
@@ -48,6 +49,13 @@ export default class Referee {
         return false;
     }
 
+    /**
+     * true if the tile is occupied
+     * @param x x axis of the tile
+     * @param y y axis of the tile
+     * @param boardState array of pieces
+     * @returns true if the tile is occupied
+     */
     static tileIsOccupied(x: number, y: number, boardState: Piece[]): Boolean {
         // console.log("checking if tile is occupied...");
 
@@ -60,9 +68,14 @@ export default class Referee {
         }
     }
 
+    /**
+     * true if the tile is occupied by opponent
+     * @param x x axis of the tile
+     * @param y y axis of the tile
+     * @param boardState array of pieces
+     * @returns true if the tile is occupied opponent
+     */
     tileIsOccupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): Boolean {
-        // console.log("checking if tile is occupied...");
-
         const piece = boardState.find(p => p.x === x && p.y === y && p.color !== team);
 
         if (piece) {
@@ -72,24 +85,33 @@ export default class Referee {
         }
     }
 
-
+    /**
+     * helper function to handle logic for moving a piece
+     * @param board Array of all the pieces
+     * @param currentPiece the piece you want to move
+     * @param newPosition the location of the new piece you want to move it to
+     * @returns an updated version of all the pieces
+     */
     static movePiece(
         board: Piece[],
         currentPiece: Piece,
-        x: number,
-        y: number,
-        attackedPiece: Piece | null | undefined = null):
+        newPosition: Position
+        // attackedPiece: Piece | null | undefined = null
+    ):
         Piece[] {
-        const updatedPieces = board.reduce((results, piece) => {
+        
+        const newBoard = Checkers_AI.deepCopy(board)
+        const attackedPiece = this.getAttackedPiece({x: currentPiece.x, y:currentPiece.y},newPosition, currentPiece.pieceType, currentPiece.color, board );
+        const updatedPieces = newBoard.reduce((results, piece) => {
 
             // Move the selected piece to its new location
             if (piece.x === currentPiece.x && piece.y === currentPiece.y) {
                 // if moved piece found, update its location and put it back into the array
-                piece.x = x;
-                piece.y = y;
+                piece.x = newPosition.x;
+                piece.y = newPosition.y;
 
                 // convert Pawn to King if pawn has reached the end of the board
-                if (piece.pieceType !== PieceType.KING && Referee.pawnReachedTheEnd(y, currentPiece.color)) {
+                if (piece.pieceType !== PieceType.KING && Referee.pawnReachedTheEnd(newPosition.y, currentPiece.color)) {
                     piece.pieceType = PieceType.KING;
                 }
                 results.push(piece);
@@ -136,11 +158,18 @@ export default class Referee {
         return TeamType.NONE;
     }
 
+    /**
+     * returns a Piece if there is a piece to attack, else undefined
+     * @param prevPosition previous position of moving piece
+     * @param newPosition new position of the moving piece
+     * @param type type of the piece, king or pawn
+     * @param team color of the piece, blue or red
+     * @param boardState array of all the pieces
+     * @returns returns a Piece if there is a piece to attack
+     */
     static getAttackedPiece(
-        px: number,
-        py: number,
-        x: number,
-        y: number,
+        prevPosition: Position,
+        newPosition: Position,
         type: PieceType,
         team: TeamType,
         boardState: Piece[]
@@ -148,24 +177,34 @@ export default class Referee {
 
         if (type === PieceType.PAWN) {
             const yAttackedPieceDirection = (team === TeamType.RED) ? 1 : -1;
-            const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
-            const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
+            const xAttackedPieceDirection = (newPosition.x - prevPosition.x > 0) ? 1 : -1;
+            const attackedPiece = boardState.find(p => p.x === (prevPosition.x + xAttackedPieceDirection) && p.y === (prevPosition.y + yAttackedPieceDirection));
+            const currentPiece = boardState.find(p => p.x === prevPosition.x && p.y === prevPosition.y);
 
+            if (attackedPiece?.color === currentPiece?.color) {
+                return undefined;
+            }
             return attackedPiece;
 
         } else if (type === PieceType.KING) {
 
-            const yAttackedPieceDirection = (y > py) ? 1 : -1;
-            const xAttackedPieceDirection = (x - px > 0) ? 1 : -1;
-            const attackedPiece = boardState.find(p => p.x === (px + xAttackedPieceDirection) && p.y === (py + yAttackedPieceDirection));
+            const yAttackedPieceDirection = (newPosition.y > prevPosition.y) ? 1 : -1;
+            const xAttackedPieceDirection = (newPosition.x - prevPosition.x > 0) ? 1 : -1;
+            const attackedPiece = boardState.find(p => p.x === (prevPosition.x + xAttackedPieceDirection) && p.y === (prevPosition.y + yAttackedPieceDirection));
 
             return attackedPiece;
         }
     }
 
-    public static getPossibleMoves(board: Piece[], piece: Piece): Map<Position, Piece | null> {
+    /**
+     * returns a Map where the key is the piece location, value is whether or not it skips a pieace
+     * @param board array of all the pieces
+     * @param piece the peace you want to get the possible moves for
+     * @returns a Map where the key is the piece location, value is whether or not it skips a pieace
+     */
+    public static getPossibleMovesForPiece(board: Piece[], piece: Piece): Map<string, Piece | null> {
 
-        const validMoves: Map<Position, Piece | null> = new Map();
+        const validMoves: Map<string, Piece | null> = new Map();
 
         const PrevPosition: Position = {
             x: piece.x,
@@ -182,59 +221,68 @@ export default class Referee {
                 x: piece.x + movementDirection[0],
                 y: piece.y + movementDirection[1]
             }
+            const newMovePositionJSONString = JSON.stringify(newMovPosition)
+
             const newAtkPosition: Position = {
                 x: piece.x + attackDirection[0],
                 y: piece.y + attackDirection[1]
             }
+            const newAtkPositionJSONString = JSON.stringify(newAtkPosition)
 
             // checking if movement direction is valid
             if (this.isValidMove(
-                PrevPosition.x,
-                PrevPosition.y,
-                newMovPosition.x,
-                newMovPosition.y,
+                PrevPosition,
+                newMovPosition,
                 piece.pieceType,
                 piece.color,
                 board)
             ) {
-                validMoves.set(newMovPosition, null);
+                validMoves.set(newMovePositionJSONString, null);
             }
 
             // checking if attack direction is valid
-            if (this.isValidMove(
-                PrevPosition.x,
-                PrevPosition.y,
-                newAtkPosition.x,
-                newAtkPosition.y,
+            else if (this.isValidMove(
+                PrevPosition,
+                newAtkPosition,
                 piece.pieceType,
                 piece.color,
                 board)
             ) {
-                const attackedPiece = board.find(p =>
-                    p.x === (PrevPosition.x + newMovPosition.x) &&
-                    p.y === (PrevPosition.y + newMovPosition.y)
-                );
+                const attackedPiece = this.getAttackedPiece(PrevPosition, newAtkPosition, piece.pieceType, piece.color, board)
+
                 if (attackedPiece) {
-                    validMoves.set(newMovPosition, attackedPiece)
+                    validMoves.set(newAtkPositionJSONString, attackedPiece)
                 }
             }
         }
-
         return validMoves
     }
 
+    /**
+     * returns true if the move is legal
+     * @param prevPosition previous position of the moving piece
+     * @param newPosition new position of the moving piece
+     * @param type type of the piece, pawn or king
+     * @param team team color of the piece
+     * @param boardState array of all the pieces
+     * @returns true if the move is legal
+     */
     static isValidMove(
-        px: number,
-        py: number,
-        x: number,
-        y: number,
+        prevPosition: Position,
+        newPosition: Position,
         type: PieceType,
         team: TeamType,
         boardState: Piece[]
     ): Boolean {
 
         // return false if user clicked on empty piece
-        if (this.tileIsOccupied(x, y, boardState)) {
+        if (
+            this.tileIsOccupied(newPosition.x, newPosition.y, boardState) ||
+            newPosition.x < 0 ||
+            newPosition.x > 7 ||
+            newPosition.y > 7 ||
+            newPosition.y < 0
+        ) {
             return false
         }
 
@@ -245,14 +293,19 @@ export default class Referee {
             const yDirection = (team === TeamType.RED) ? 1 : -1;
 
             // movement logic
-            if (y - py === (1 * yDirection) && Math.abs(px - x) === 1) {
+            if (
+                newPosition.y - prevPosition.y === (1 * yDirection) &&
+                Math.abs(prevPosition.x - newPosition.x) === 1
+            ) {
                 return true
             }
             // attack logic
-            if (y - py === (2 * yDirection) && Math.abs(px - x) === 2) {
+            if (
+                newPosition.y - prevPosition.y === (2 * yDirection) &&
+                Math.abs(prevPosition.x - newPosition.x) === 2) {
 
                 // return false if there is no pawn to attack
-                if (!this.getAttackedPiece(px, py, x, y, type, team, boardState)) {
+                if (!this.getAttackedPiece(prevPosition, newPosition, type, team, boardState)) {
                     return false
                 }
                 return true;
@@ -266,14 +319,14 @@ export default class Referee {
             // get the direction of the piece, red goes up blue goes down
 
             // movement logic
-            if (Math.abs(y - py) === 1 && Math.abs(px - x) === 1) {
+            if (Math.abs(newPosition.y - prevPosition.y) === 1 && Math.abs(prevPosition.x - newPosition.x) === 1) {
                 return true
             }
             // attack logic
-            if (Math.abs(y - py) === 2 && Math.abs(px - x) === 2) {
+            if (Math.abs(newPosition.y - prevPosition.y) === 2 && Math.abs(prevPosition.x - newPosition.x) === 2) {
 
                 // return false if there is no pawn to attack
-                if (!this.getAttackedPiece(px, py, x, y, type, team, boardState)) {
+                if (!this.getAttackedPiece(prevPosition, newPosition, type, team, boardState)) {
                     return false
                 }
                 return true;

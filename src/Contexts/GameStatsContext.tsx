@@ -31,17 +31,17 @@ export function GameStatsProvider({ children }: Props) {
     const [gameStats, setGameStats] = useState(initialGameStats)
 
 
-    function updateGameStats(teamType: TeamType, attacked: boolean) {
+    function updateGameStats(teamColorJustPlayed: TeamType, attacked: boolean) {
 
         let prevGameStats = {...gameStats}
         console.log(prevGameStats);
         
-        prevGameStats.turn = (teamType === TeamType.RED) ? TeamType.BLUE : TeamType.RED;
+        prevGameStats.turn = (teamColorJustPlayed === TeamType.RED) ? TeamType.BLUE : TeamType.RED;
 
         if (attacked) {
-            if (teamType === TeamType.RED) {
+            if (teamColorJustPlayed === TeamType.RED) {
                 prevGameStats.redAttacks = prevGameStats.redAttacks
-            } else if (teamType === TeamType.BLUE) {
+            } else if (teamColorJustPlayed === TeamType.BLUE) {
                 prevGameStats.blueAttacks = prevGameStats.blueAttacks
             }
         }

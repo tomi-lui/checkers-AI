@@ -10,7 +10,7 @@
 }
 
 .tile .chess-piece:active {
-  curor: grabbing;
+  cursor: grabbing;
 }
 
 .black-tile {
@@ -27,4 +27,5 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: 80px;
+  position: relative;
 }

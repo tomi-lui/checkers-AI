@@ -1,11 +1,12 @@
-import React, { useRef, useState } from "react";
-import Referee from "../../referee/Referee"
+import React, { useEffect, useRef, useState } from "react";
+import Referee, { Position } from "../../referee/Referee"
 import "./Board.css";
 import Tile from "../Tile/Tile"
 import {
-  GRID_SIZE, horizontalAxis, NUM_OF_PIECES_PER_COLOR, Piece, PieceType, TeamType, verticalAxis
+  BOARD_HEIGHT,
+  GRID_SIZE, horizontalAxis, MINIMAX_DEPTH, Piece, PieceType, TeamType, verticalAxis
 } from "../../Constants"
-import { useGameStats, useGameStatsUpdate} from "../../Contexts/GameStatsContext";
+import { Checkers_AI } from "../../minimax/algorithm";
 
 
 const initialBoardState: Piece[] = [];
@@ -25,7 +26,6 @@ for (let i = 0; i < 8; i++) {
     initialBoardState.push({ color: 1, x: i, y: 5, pieceType: PieceType.PAWN });
   }
 }
-
 // initialize red pieces
 for (let i = 0; i < 8; i++) {
   if (i % 2 === 0)
@@ -44,43 +44,106 @@ export default function Board() {
 
   const boardRef = useRef<HTMLElement>(null);
   const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
-  const [gridX, setGridX] = useState(0);
-  const [gridY, setGridY] = useState(0);
+  const [originalPosition, setOriginalPosition] = useState({ x: -1, y: -1 })
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
 
-  const updateGameStats = useGameStatsUpdate();
-  const gameStats = useGameStats();
+  const [board, setBoard] = useState<any>()
+  const [toggle, setToggle] = useState(false)
 
+  function populateBoard() {
+    let tempBoard = []
+    for (let j = verticalAxis.length - 1; j >= 0; j--) {
+      for (let i = 0; i < horizontalAxis.length; i++) {
+
+        let color = 0;
+        let pieceType = PieceType.PAWN;
+        let x = i;
+        let y = j;
+        pieces.forEach((p) => {
+          if (p.x === i && p.y === j) {
+            color = p.color;
+            pieceType = p.pieceType;
+          }
+        })
+
+        tempBoard.push(
+          <Tile
+            id={`xy${x}_${y}`}
+            key={`${j},${i}`}
+            pieceTeam={color}
+            number={j + i + 2}
+            pieceType={pieceType}
+          />);
+      }
+    }
+    setBoard(tempBoard)
+  }
+
+  useEffect(() => {
+    populateBoard()
+    if (toggle) {
+      const { pieces: AIPieces } = Checkers_AI.minimax(pieces, MINIMAX_DEPTH, true);
+      setPieces(AIPieces)
+      setToggle(false)
+    }
+    alertIfWinner()
+  }, [pieces])
+
+  // extract x and y coordinates from css class
+  function extractCordinates(classes: string[]) {
+    let x = -1;
+    let y = -1;
+    classes.forEach(c => {
+      if (c.includes('xy')) {
+        let s = c.split('_')
+        x = parseInt(s[0].slice(2))
+        y = parseInt(s[1])
+      }
+    })
+    if (activePiece?.classList.contains("blue")) {
+      activePiece.style.position = ''
+    }
+    return { x, y }
+  }
+
+  // hanlde grabbing piece
   function grabPiece(e: React.MouseEvent) {
 
     const element = e.target as HTMLElement;
     const board = boardRef.current;
-    const teamColor = (gameStats.turn === TeamType.RED) ? "red" : "blue";
+
     if (
-      element.classList.contains("chess-piece") && 
-      element.classList.contains(teamColor) &&
-      board ) {
+      element.classList.contains("chess-piece") &&
+      element.classList.contains("red") &&
+      !element.classList.contains("blue") &&
+      board
+    ) {
+
+      const { x: originalX, y: originalY } = extractCordinates(Array.from(element.classList))
+
       const x = e.clientX - 50;
-      const y = e.clientY + 60;
+      const y = e.clientY - 50;
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
 
-      const xFloored = Math.floor((e.clientX - board.offsetLeft) / GRID_SIZE);
-      const yFloored = Math.abs(
-        Math.ceil(((e.clientY + 80 )- board.offsetTop - 800) / GRID_SIZE)
-      );
-      setGridX(xFloored);
-      setGridY(yFloored);
-
+      setOriginalPosition({
+        x: originalX,
+        y: originalY,
+      })
       setActivePiece(element)
+      // element.style.position = "relative";
     }
   }
 
+  // update element/piece location as you drag the piece
   function movePiece(e: React.MouseEvent) {
 
     const board = boardRef.current;
-    if (activePiece && board) {
+    if (activePiece &&
+      board &&
+      activePiece.classList.contains("red")
+    ) {
 
       const minX = board.offsetLeft;
       const minY = board.offsetTop;
@@ -88,9 +151,9 @@ export default function Board() {
       const maxY = board.offsetTop + board.clientHeight - 75;
 
       const x = e.clientX - 50;
-      const y = e.clientY + 50;
+      const y = e.clientY - 50;
 
-      activePiece.style.position = "absolute";
+      // activePiece.style.position = "absolute";
       activePiece.style.left = `${x}px`;
       activePiece.style.top = `${y}px`;
 
@@ -121,64 +184,44 @@ export default function Board() {
     }
   }
 
+  // handle dropping/placing the piece on the tile
   function dropPiece(e: React.MouseEvent) {
 
+    let newPieces = null;
     const chessboard = boardRef.current;
 
     if (activePiece && chessboard) {
 
       // floor the coordinates to find the nearest placing square
-      const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
-      const y = Math.abs(
-        Math.ceil(((e.clientY + 80)- chessboard.offsetTop - 800) / GRID_SIZE)
-      );
+      const newPosition: Position = {
+        x: Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE),
+        y: Math.abs(
+          Math.ceil((e.clientY - chessboard.offsetTop - BOARD_HEIGHT) / GRID_SIZE)
+        )
+      }
 
       // find the current piece
-      const currentPiece = pieces.find(p => p.x === gridX && p.y === gridY);
+      const currentPiece = pieces.find(p => p.x === originalPosition.x && p.y === originalPosition.y);
 
-      if (currentPiece) {
+      if (currentPiece && currentPiece.color === TeamType.RED) {
 
-        const attackedPiece = Referee.getAttackedPiece(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
-        const validMove = Referee.isValidMove(gridX, gridY, x, y, currentPiece.pieceType, currentPiece.color, pieces);
+        const validMove = Referee.isValidMove(originalPosition, newPosition, currentPiece.pieceType, currentPiece.color, pieces);
 
         if (validMove) {
-
           // return a new board with new piece position and update it
-          const updatedPieces = Referee.movePiece(pieces, currentPiece, x,y,attackedPiece);
-          setPieces(updatedPieces)
-          
-          const attacked = (attackedPiece) ? true : false;
-          updateGameStats(currentPiece.color, attacked);
-
-          if (
-            (gameStats.blueAttacks +1) === NUM_OF_PIECES_PER_COLOR || 
-            (gameStats.redAttacks + 1) === NUM_OF_PIECES_PER_COLOR
-          ) {
-            const colorString = currentPiece.color === TeamType.BLUE ? "Blue" : "Red";
-            alert(`${colorString} Won!!!`);
-          }
+          const movedPieces = Referee.movePiece(pieces, currentPiece, newPosition);
+          setPieces(movedPieces);
 
         } else {
-
           // reset the piece location if it is not a valid move
           setPieces(value => {
             const pieces = value.map(p => {
-              if (p.x === gridX && p.y === gridY) {
+              if (p.x === originalPosition.x && p.y === originalPosition.y && p.color === TeamType.RED) {
 
-                const validMove = Referee.isValidMove(gridX, gridY, x, y, p.pieceType, p.color, value);
-
-                if (validMove) {
-                  p.x = x;
-                  p.y = y;
-                }
-                else {
-                  // reset piece position
-                  activePiece.style.position = 'relative';
-                  activePiece.style.removeProperty('top')
-                  activePiece.style.removeProperty('left')
-                  p.x = gridX;
-                  p.y = gridY;
-                }
+                // reset piece position
+                activePiece.style.position = 'relative';
+                activePiece.style.removeProperty('top')
+                activePiece.style.removeProperty('left')
               }
               return p;
             })
@@ -186,23 +229,24 @@ export default function Board() {
           })
         }
       }
+      if (newPieces) {
+        setPieces(newPieces)
+      }
+      setToggle(true)
+      // alertIfWinner();
       setActivePiece(null);
     }
   }
 
-  let board = [];
-  for (let j = verticalAxis.length - 1; j >= 0; j--) {
-    for (let i = 0; i < horizontalAxis.length; i++) {
+  function alertIfWinner() {
+    // alert if we have a winner
+    console.log("red", Checkers_AI.countPieces(pieces, TeamType.RED).length);
 
-      let color = 0;
-      let pieceType = PieceType.PAWN;
-      pieces.forEach((p) => {
-        if (p.x === i && p.y === j) {
-          color = p.color;
-          pieceType = p.pieceType;
-        }
-      })
-      board.push(<Tile key={`${j},${i}`} pieceTeam={color} number={j + i + 2} pieceType={pieceType} />);
+    if (Checkers_AI.countPieces(pieces, TeamType.BLUE).length === 0) {
+      alert(`BLUE Won!!!`);
+    }
+    if (Checkers_AI.countPieces(pieces, TeamType.RED).length === 0) {
+      alert(`RED Won!!!`);
     }
   }
 
