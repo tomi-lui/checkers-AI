@@ -18,9 +18,8 @@
 }
 
 .app {
-
   color: #353C4E;
-  background: #F0F2F4;
+  background: #000000;
   display: flex;
   flex-direction: column;
   justify-content: center;
