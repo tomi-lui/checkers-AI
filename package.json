@@ -1,7 +1,7 @@
 {
   "name": "tesla-typescript",
   "version": "0.1.0",
-  "homepage": "https://6momo1.github.io/checkers",
+  "homepage": "https://6momo1.github.io/checkers-AI",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.2.1",

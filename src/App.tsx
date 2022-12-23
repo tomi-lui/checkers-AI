@@ -30,8 +30,8 @@ function App() {
           <div className='blue-font'>BLUE</div>}
         </h3>
         <h3 className=''>Move: {gameStats.moves}</h3>
-        <h3 className="red-font">Red Kills: {gameStats.redAttacks}</h3>
-        <h3 className='blue-font'>Blue Kills: {gameStats.blueAttacks}</h3>
+        {/* <h3 className="red-font">Red Kills: {gameStats.redAttacks}</h3>
+        <h3 className='blue-font'>Blue Kills: {gameStats.blueAttacks}</h3> */}
       </div>
       <Board />
       <div className='info-section'>
