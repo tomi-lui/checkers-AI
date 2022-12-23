@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/checkers/static/css/main.3e47b55b.css",
-    "main.js": "/checkers/static/js/main.57e10d70.js",
-    "static/js/787.d8a97e80.chunk.js": "/checkers/static/js/787.d8a97e80.chunk.js",
-    "index.html": "/checkers/index.html",
-    "main.3e47b55b.css.map": "/checkers/static/css/main.3e47b55b.css.map",
-    "main.57e10d70.js.map": "/checkers/static/js/main.57e10d70.js.map",
-    "787.d8a97e80.chunk.js.map": "/checkers/static/js/787.d8a97e80.chunk.js.map"
+    "main.css": "/checkers-AI/static/css/main.debe7c3d.css",
+    "main.js": "/checkers-AI/static/js/main.95f89576.js",
+    "static/js/787.d8a97e80.chunk.js": "/checkers-AI/static/js/787.d8a97e80.chunk.js",
+    "index.html": "/checkers-AI/index.html",
+    "main.debe7c3d.css.map": "/checkers-AI/static/css/main.debe7c3d.css.map",
+    "main.95f89576.js.map": "/checkers-AI/static/js/main.95f89576.js.map",
+    "787.d8a97e80.chunk.js.map": "/checkers-AI/static/js/787.d8a97e80.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.3e47b55b.css",
-    "static/js/main.57e10d70.js"
+    "static/css/main.debe7c3d.css",
+    "static/js/main.95f89576.js"
   ]
 }
