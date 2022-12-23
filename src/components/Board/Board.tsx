@@ -7,6 +7,7 @@ import {
   GRID_SIZE, horizontalAxis, MINIMAX_DEPTH, Piece, PieceType, TeamType, verticalAxis
 } from "../../Constants"
 import { Checkers_AI } from "../../minimax/algorithm";
+import { useGameStats, useGameStatsUpdate } from "../../Contexts/GameStatsContext";
 
 
 const initialBoardState: Piece[] = [];
@@ -50,6 +51,10 @@ export default function Board() {
   const [board, setBoard] = useState<any>()
   const [toggle, setToggle] = useState(false)
 
+  const switchTurns = useGameStatsUpdate()
+
+  const gameInfo = useGameStats()
+
   function populateBoard() {
     let tempBoard = []
     for (let j = verticalAxis.length - 1; j >= 0; j--) {
@@ -82,7 +87,7 @@ export default function Board() {
   useEffect(() => {
     populateBoard()
     if (toggle) {
-      const { pieces: AIPieces } = Checkers_AI.minimax(pieces, MINIMAX_DEPTH, true);
+      const { pieces: AIPieces } = Checkers_AI.minimax(pieces, gameInfo.minimaxDepth, true);
       setPieces(AIPieces)
       setToggle(false)
     }
@@ -212,6 +217,9 @@ export default function Board() {
           const movedPieces = Referee.movePiece(pieces, currentPiece, newPosition);
           setPieces(movedPieces);
 
+          setToggle(true)
+          switchTurns()
+
         } else {
           // reset the piece location if it is not a valid move
           setPieces(value => {
@@ -232,7 +240,6 @@ export default function Board() {
       if (newPieces) {
         setPieces(newPieces)
       }
-      setToggle(true)
       // alertIfWinner();
       setActivePiece(null);
     }

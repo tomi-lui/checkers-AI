@@ -1,17 +1,19 @@
 import React, { ReactNode, useContext } from "react";
 import { useState } from "react";
-import { TeamType } from "../Constants";
+import { MINIMAX_DEPTH, TeamType } from "../Constants";
 
 export interface GameStats {
     redAttacks: number;
     blueAttacks: number;
-    turn: TeamType
+    turn: TeamType;
+    minimaxDepth: number;
+    moves: number
 }
 
-const initialGameStats: GameStats = { redAttacks: 0, blueAttacks: 0, turn: TeamType.RED }
+const initialGameStats: GameStats = { redAttacks: 0, blueAttacks: 0, turn: TeamType.RED, minimaxDepth: 3, moves: 0 }
 const GameStatsContext = React.createContext(initialGameStats)
-const GameStatsUpdateContext = React.createContext((teamType: TeamType, attacked:boolean) => { })
-
+const GameStatsUpdateContext = React.createContext(() => { })
+const updateAIDifficultyContext = React.createContext((depth: number) => { })
 
 export function useGameStats() {
     return useContext(GameStatsContext)
@@ -21,41 +23,50 @@ export function useGameStatsUpdate() {
     return useContext(GameStatsUpdateContext)
 }
 
-
+export function useUpdateAIDifficulty() {
+    return useContext(updateAIDifficultyContext)
+}
 interface Props {
     children?: ReactNode
 }
 
-export function GameStatsProvider({ children }: Props) {
+export function GameInfoProvider({ children }: Props) {
 
-    const [gameStats, setGameStats] = useState(initialGameStats)
+    const [gameInfo, setGameInfo] = useState(initialGameStats)
 
+    function updateAIDifficulty(depth: number) {
+        let prevGameStats = { ...gameInfo }
+        prevGameStats.minimaxDepth = depth
+        setGameInfo(prevGameStats)
+    }
 
-    function updateGameStats(teamColorJustPlayed: TeamType, attacked: boolean) {
+    function switchTurns() {
 
-        let prevGameStats = {...gameStats}
-        console.log(prevGameStats);
-        
-        prevGameStats.turn = (teamColorJustPlayed === TeamType.RED) ? TeamType.BLUE : TeamType.RED;
+        let prevGameStats = { ...gameInfo }
+        prevGameStats.moves = prevGameStats.moves + 1
 
-        if (attacked) {
-            if (teamColorJustPlayed === TeamType.RED) {
-                prevGameStats.redAttacks = prevGameStats.redAttacks
-            } else if (teamColorJustPlayed === TeamType.BLUE) {
-                prevGameStats.blueAttacks = prevGameStats.blueAttacks
-            }
-        }
+        // // alternate turn
+        // prevGameStats.turn = (teamColorJustPlayed === TeamType.RED) ? TeamType.BLUE : TeamType.RED;
 
-        setGameStats(prevGameStats)
-        
+        // // 
+        // if (attacked) {
+        //     if (teamColorJustPlayed === TeamType.RED) {
+        //         prevGameStats.redAttacks = prevGameStats.redAttacks
+        //     } else if (teamColorJustPlayed === TeamType.BLUE) {
+        //         prevGameStats.blueAttacks = prevGameStats.blueAttacks
+        //     }
+        // }
+        setGameInfo(prevGameStats)
     }
 
     return (
-        <GameStatsContext.Provider value={gameStats}>
-            <GameStatsUpdateContext.Provider value={updateGameStats}>
+        <updateAIDifficultyContext.Provider value={updateAIDifficulty} >
+            <GameStatsContext.Provider value={gameInfo}>
+                <GameStatsUpdateContext.Provider value={switchTurns}>
                     {children}
-            </GameStatsUpdateContext.Provider>
-        </GameStatsContext.Provider>
+                </GameStatsUpdateContext.Provider>
+            </GameStatsContext.Provider>
+        </updateAIDifficultyContext.Provider>
     );
 
 }
