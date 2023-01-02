@@ -1,5 +1,5 @@
 # Play The Game Here!
-https://6momo1.github.io/checkers
+https://6momo1.github.io/checkers-AI/
 
 A checkers game built with React and Typescript, featuring drag and drop play and an AI opponent implemented with the minimax algorithm. Players can test their skills against the AI or play against a friend in two-player mode.
 
