@@ -1,4 +1,4 @@
-# Play The Game Here!
+# Play Checkers Against AI!
 https://tomi-lui.github.io/checkers-AI/
 
 A checkers game built with React and Typescript, featuring drag and drop play and an AI opponent implemented with the minimax algorithm. Players can test their skills against the AI or play against a friend in two-player mode.
